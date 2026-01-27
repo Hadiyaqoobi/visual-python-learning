@@ -1,0 +1,198 @@
+// Prisma Schema for Visual Python Learning Platform
+// Documentation: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String?
+  lastName      String?
+  avatarUrl     String?
+  role          UserRole  @default(STUDENT)
+  emailVerified Boolean   @default(false)
+  
+  // Progress tracking
+  currentChapter Int      @default(1)
+  totalXp        Int      @default(0)
+  streak         Int      @default(0)
+  lastActiveAt   DateTime?
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  progress      ChapterProgress[]
+  exercises     ExerciseAttempt[]
+  sessions      Session[]
+  
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+// ============================================
+// CURRICULUM & PROGRESS
+// ============================================
+
+model Chapter {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  title       String
+  description String
+  orderIndex  Int
+  isPublished Boolean  @default(false)
+  
+  // Content
+  content     Json?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  lessons     Lesson[]
+  exercises   Exercise[]
+  progress    ChapterProgress[]
+  
+  @@map("chapters")
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  chapterId   Int
+  slug        String
+  title       String
+  content     Json
+  orderIndex  Int
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  chapter     Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  
+  @@unique([chapterId, slug])
+  @@map("lessons")
+}
+
+model Exercise {
+  id              String         @id @default(cuid())
+  chapterId       Int
+  slug            String
+  title           String
+  description     String
+  difficulty      Difficulty     @default(BEGINNER)
+  
+  // Exercise content
+  starterCode     String
+  solutionCode    String
+  testCases       Json
+  hints           Json?
+  
+  // Points and ordering
+  xpReward        Int            @default(10)
+  orderIndex      Int
+  
+  // Timestamps
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  // Relations
+  chapter         Chapter        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  attempts        ExerciseAttempt[]
+  
+  @@unique([chapterId, slug])
+  @@map("exercises")
+}
+
+model ChapterProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  chapterId       Int
+  
+  // Progress tracking
+  status          ProgressStatus @default(NOT_STARTED)
+  completedAt     DateTime?
+  lastAccessedAt  DateTime       @default(now())
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter         Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, chapterId])
+  @@map("chapter_progress")
+}
+
+model ExerciseAttempt {
+  id          String   @id @default(cuid())
+  userId      String
+  exerciseId  String
+  
+  // Attempt details
+  code        String
+  passed      Boolean
+  output      String?
+  errorMessage String?
+  executionTimeMs Int?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  
+  @@map("exercise_attempts")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
