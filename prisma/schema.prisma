@@ -3,127 +3,219 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
+// ==================== AUTH TABLES ====================
+
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String
-  firstName     String?
-  lastName      String?
-  avatarUrl     String?
-  role          UserRole  @default(STUDENT)
-  emailVerified Boolean   @default(false)
-  currentChapter Int      @default(1)
-  totalXp        Int      @default(0)
-  streak         Int      @default(0)
+  id             String    @id @default(cuid())
+  email          String    @unique
+  passwordHash   String
+  name           String?
+  avatar         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  // Relations
+  sessions       Session[]
+  lessonProgress LessonProgress[]
+  exerciseAttempts ExerciseAttempt[]
+  achievements   UserAchievement[]
+  
+  // Gamification
+  totalXp        Int       @default(0)
+  currentStreak  Int       @default(0)
+  longestStreak  Int       @default(0)
   lastActiveAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  progress      ChapterProgress[]
-  exercises     ExerciseAttempt[]
-  sessions      Session[]
-  @@map("users")
+
+  @@index([email])
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  userId       String
-  token        String   @unique
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@map("sessions")
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
 }
 
+// ==================== CURRICULUM TABLES ====================
+
 model Chapter {
-  id          Int      @id @default(autoincrement())
-  slug        String   @unique
+  id          String    @id @default(cuid())
+  number      Int       @unique
   title       String
   description String
-  orderIndex  Int
-  isPublished Boolean  @default(false)
-  content     Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  objectives  String[]
+  imageUrl    String?
+  isPublished Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  sections    Section[]
+
+  @@index([number])
+}
+
+model Section {
+  id          String    @id @default(cuid())
+  chapterId   String
+  number      Float     // 1.1, 1.2, 1.3 etc
+  title       String
+  description String?
+  order       Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  chapter     Chapter   @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   lessons     Lesson[]
-  exercises   Exercise[]
-  progress    ChapterProgress[]
-  @@map("chapters")
+
+  @@unique([chapterId, number])
+  @@index([chapterId])
+  @@index([order])
 }
 
 model Lesson {
-  id          String   @id @default(cuid())
-  chapterId   Int
-  slug        String
-  title       String
-  content     Json
-  orderIndex  Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  chapter     Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  @@unique([chapterId, slug])
-  @@map("lessons")
+  id              String    @id @default(cuid())
+  sectionId       String
+  number          Float     // 1.1.1, 1.1.2 etc
+  title           String
+  slug            String    @unique
+  objectives      String[]
+  content         String    // Markdown content
+  codeExamples    Json      // Array of code examples
+  keyPoints       String[]
+  hardwareDemo    String?   // Instructions for hardware visualization
+  estimatedTime   Int       @default(15) // Minutes
+  difficulty      Difficulty @default(BEGINNER)
+  order           Int
+  isPublished     Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  section         Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  exercises       Exercise[]
+  lessonProgress  LessonProgress[]
+
+  @@unique([sectionId, number])
+  @@index([sectionId])
+  @@index([slug])
+  @@index([order])
 }
 
 model Exercise {
-  id              String         @id @default(cuid())
-  chapterId       Int
-  slug            String
-  title           String
-  description     String
-  difficulty      Difficulty     @default(BEGINNER)
-  starterCode     String
-  solutionCode    String
-  testCases       Json
-  hints           Json?
-  xpReward        Int            @default(10)
-  orderIndex      Int
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  chapter         Chapter        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  attempts        ExerciseAttempt[]
-  @@unique([chapterId, slug])
-  @@map("exercises")
+  id            String       @id @default(cuid())
+  lessonId      String
+  number        Int
+  title         String
+  prompt        String       // The exercise description/question
+  type          ExerciseType @default(CODE)
+  starterCode   String?
+  solution      String?
+  hints         String[]
+  testCases     Json?        // Array of test cases for code exercises
+  xpReward      Int          @default(10)
+  difficulty    Difficulty   @default(BEGINNER)
+  order         Int
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  // Relations
+  lesson        Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  attempts      ExerciseAttempt[]
+
+  @@unique([lessonId, number])
+  @@index([lessonId])
+  @@index([order])
 }
 
-model ChapterProgress {
-  id              String   @id @default(cuid())
-  userId          String
-  chapterId       Int
-  status          ProgressStatus @default(NOT_STARTED)
-  completedAt     DateTime?
-  lastAccessedAt  DateTime       @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  chapter         Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  @@unique([userId, chapterId])
-  @@map("chapter_progress")
+// ==================== PROGRESS TABLES ====================
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  lessonId    String
+  status      ProgressStatus @default(NOT_STARTED)
+  startedAt   DateTime?
+  completedAt DateTime?
+  timeSpent   Int       @default(0) // Seconds
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@index([status])
 }
 
 model ExerciseAttempt {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
   exerciseId  String
-  code        String
-  passed      Boolean
-  output      String?
-  errorMessage String?
-  executionTimeMs Int?
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  @@map("exercise_attempts")
+  code        String?
+  response    String?   // For text responses
+  isCorrect   Boolean   @default(false)
+  xpEarned    Int       @default(0)
+  feedback    String?
+  attemptNumber Int     @default(1)
+  createdAt   DateTime  @default(now())
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise    Exercise  @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([exerciseId])
+  @@index([userId, exerciseId])
 }
 
-enum UserRole {
-  STUDENT
-  INSTRUCTOR
-  ADMIN
+// ==================== GAMIFICATION TABLES ====================
+
+model Achievement {
+  id          String    @id @default(cuid())
+  code        String    @unique // e.g., "first_lesson", "chapter_1_complete"
+  title       String
+  description String
+  iconUrl     String?
+  xpReward    Int       @default(0)
+  category    AchievementCategory @default(PROGRESS)
+  createdAt   DateTime  @default(now())
+  
+  // Relations
+  userAchievements UserAchievement[]
+
+  @@index([code])
 }
+
+model UserAchievement {
+  id            String    @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime  @default(now())
+  
+  // Relations
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
+
+// ==================== ENUMS ====================
 
 enum Difficulty {
   BEGINNER
@@ -131,8 +223,25 @@ enum Difficulty {
   ADVANCED
 }
 
+enum ExerciseType {
+  CODE           // Write code that passes tests
+  MULTIPLE_CHOICE // Select correct answer
+  TEXT_RESPONSE  // Free text response
+  FILL_BLANK     // Fill in missing code
+  FIX_BUG        // Find and fix the bug
+  PREDICT_OUTPUT // Predict what code will output
+}
+
 enum ProgressStatus {
   NOT_STARTED
   IN_PROGRESS
   COMPLETED
+}
+
+enum AchievementCategory {
+  PROGRESS      // Completing lessons/chapters
+  STREAK        // Daily streaks
+  MASTERY       // Perfect scores
+  EXPLORATION   // Trying features
+  SOCIAL        // Community
 }

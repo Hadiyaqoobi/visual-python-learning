@@ -5,7 +5,6 @@ import { getSessionCookie, verifyToken } from "@/lib/auth/jwt";
 export async function GET() {
   try {
     const token = await getSessionCookie();
-
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Not authenticated" },
@@ -14,7 +13,6 @@ export async function GET() {
     }
 
     const payload = await verifyToken(token);
-
     if (!payload) {
       return NextResponse.json(
         { success: false, error: "Invalid session" },
@@ -34,20 +32,17 @@ export async function GET() {
       );
     }
 
-    // Get user data
+    // Get user data with fields that exist in our schema
     const user = await db.user.findUnique({
       where: { id: payload.userId },
       select: {
         id: true,
         email: true,
-        firstName: true,
-        lastName: true,
-        avatarUrl: true,
-        role: true,
-        emailVerified: true,
-        currentChapter: true,
+        name: true,
+        avatar: true,
         totalXp: true,
-        streak: true,
+        currentStreak: true,
+        longestStreak: true,
         lastActiveAt: true,
         createdAt: true,
       },
@@ -66,7 +61,6 @@ export async function GET() {
     );
   } catch (error) {
     console.error("Get user error:", error);
-
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred" },
       { status: 500 }

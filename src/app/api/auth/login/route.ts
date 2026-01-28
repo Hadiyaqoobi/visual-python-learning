@@ -10,13 +10,11 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     const validationResult = loginSchema.safeParse(body);
-
     if (!validationResult.success) {
       const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join("."),
         message: err.message,
       }));
-
       return NextResponse.json(
         { success: false, error: "Validation failed", errors },
         { status: 400 }
@@ -43,7 +41,6 @@ export async function POST(request: NextRequest) {
 
     // Verify password
     const isValidPassword = await verifyPassword(password, user.passwordHash);
-
     if (!isValidPassword) {
       return NextResponse.json(
         {
@@ -90,9 +87,7 @@ export async function POST(request: NextRequest) {
           user: {
             id: user.id,
             email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            role: user.role,
+            name: user.name,
           },
         },
       },
@@ -100,7 +95,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("Login error:", error);
-
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred" },
       { status: 500 }

@@ -9,13 +9,11 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     const validationResult = registerSchema.safeParse(body);
-
     if (!validationResult.success) {
       const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join("."),
         message: err.message,
       }));
-
       return NextResponse.json(
         { success: false, error: "Validation failed", errors },
         { status: 400 }
@@ -47,13 +45,13 @@ export async function POST(request: NextRequest) {
     const user = await db.user.create({
       data: {
         email: email.toLowerCase(),
-        firstName: username,
+        name: username,
         passwordHash,
       },
       select: {
         id: true,
         email: true,
-        firstName: true,
+        name: true,
         createdAt: true,
       },
     });
@@ -68,7 +66,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("Registration error:", error);
-
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred" },
       { status: 500 }

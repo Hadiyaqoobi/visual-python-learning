@@ -27,7 +27,6 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginInput) => {
     setServerError(null);
-
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -67,7 +66,6 @@ export function LoginForm() {
           Sign in to continue your Python learning journey
         </CardDescription>
       </CardHeader>
-
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {serverError && (
@@ -118,7 +116,6 @@ export function LoginForm() {
           </Button>
         </form>
       </CardContent>
-
       <CardFooter className="text-center">
         <p className="text-gray-600">
           Don&apos;t have an account?{" "}

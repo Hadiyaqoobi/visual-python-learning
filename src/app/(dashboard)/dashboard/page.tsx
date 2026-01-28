@@ -1,172 +1,151 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui";
-import { 
-  Code2, 
-  BookOpen, 
-  Trophy, 
-  Flame, 
-  ArrowRight,
-  Play,
-  Clock,
-  Target
-} from "lucide-react";
 import Link from "next/link";
+import { BookOpen, Code, Trophy, ArrowRight, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
-
-  if (!user) return null;
-
-  const quickActions = [
-    {
-      title: "Python IDE",
-      description: "Write and run Python code",
-      href: "/ide",
-      icon: Code2,
-      color: "bg-blue-600",
-    },
-    {
-      title: "Continue Learning",
-      description: "Pick up where you left off",
-      href: "/learn",
-      icon: BookOpen,
-      color: "bg-green-600",
-    },
-    {
-      title: "Practice",
-      description: "Solve coding challenges",
-      href: "/practice",
-      icon: Target,
-      color: "bg-amber-600",
-    },
-  ];
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-slate-900 p-8">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Welcome back, {user.firstName || "Learner"}! 👋
+    <div style={{ minHeight: "100vh", background: "#f8fafc", padding: "32px" }}>
+      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        {/* Welcome */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ marginBottom: "32px" }}
+        >
+          <h1 style={{ fontSize: "28px", fontWeight: "700", color: "#1e293b", marginBottom: "8px" }}>
+            Welcome back{user?.name ? `, ${user.name}` : ""}! 👋
           </h1>
-          <p className="text-slate-400">
+          <p style={{ fontSize: "16px", color: "#64748b" }}>
             Ready to continue your Python journey?
           </p>
+        </motion.div>
+
+        {/* Quick Actions */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "20px",
+          marginBottom: "32px",
+        }}>
+          <Link href="/learn" style={{ textDecoration: "none" }}>
+            <motion.div
+              whileHover={{ y: -4, boxShadow: "0 12px 24px rgba(99, 102, 241, 0.15)" }}
+              style={{
+                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                borderRadius: "16px",
+                padding: "24px",
+                color: "white",
+                cursor: "pointer",
+              }}
+            >
+              <BookOpen style={{ width: "32px", height: "32px", marginBottom: "16px" }} />
+              <h3 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px" }}>
+                Continue Learning
+              </h3>
+              <p style={{ fontSize: "14px", opacity: 0.9, marginBottom: "16px" }}>
+                Pick up where you left off in the curriculum
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: "500" }}>
+                Start Chapter 1 <ArrowRight style={{ width: "16px", height: "16px" }} />
+              </div>
+            </motion.div>
+          </Link>
+
+          <Link href="/ide" style={{ textDecoration: "none" }}>
+            <motion.div
+              whileHover={{ y: -4, boxShadow: "0 12px 24px rgba(34, 197, 94, 0.15)" }}
+              style={{
+                background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                borderRadius: "16px",
+                padding: "24px",
+                color: "white",
+                cursor: "pointer",
+              }}
+            >
+              <Code style={{ width: "32px", height: "32px", marginBottom: "16px" }} />
+              <h3 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px" }}>
+                Open IDE
+              </h3>
+              <p style={{ fontSize: "14px", opacity: 0.9, marginBottom: "16px" }}>
+                Write and run Python code with visualizations
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: "500" }}>
+                Launch IDE <ArrowRight style={{ width: "16px", height: "16px" }} />
+              </div>
+            </motion.div>
+          </Link>
+
+          <Link href="/achievements" style={{ textDecoration: "none" }}>
+            <motion.div
+              whileHover={{ y: -4, boxShadow: "0 12px 24px rgba(245, 158, 11, 0.15)" }}
+              style={{
+                background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                borderRadius: "16px",
+                padding: "24px",
+                color: "white",
+                cursor: "pointer",
+              }}
+            >
+              <Trophy style={{ width: "32px", height: "32px", marginBottom: "16px" }} />
+              <h3 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px" }}>
+                Achievements
+              </h3>
+              <p style={{ fontSize: "14px", opacity: 0.9, marginBottom: "16px" }}>
+                Track your progress and earn badges
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: "500" }}>
+                View All <ArrowRight style={{ width: "16px", height: "16px" }} />
+              </div>
+            </motion.div>
+          </Link>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={logout} 
-          className="text-slate-300 border-slate-600 hover:bg-slate-800"
+
+        {/* Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          style={{
+            background: "white",
+            borderRadius: "16px",
+            padding: "24px",
+            border: "1px solid #e2e8f0",
+          }}
         >
-          Sign Out
-        </Button>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-600/20 rounded-lg">
-              <Trophy className="w-6 h-6 text-blue-400" />
+          <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#1e293b", marginBottom: "20px" }}>
+            Your Progress
+          </h2>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: "20px",
+          }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "32px", fontWeight: "700", color: "#6366f1" }}>0</div>
+              <div style={{ fontSize: "13px", color: "#64748b" }}>Lessons Completed</div>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{user.totalXp}</p>
-              <p className="text-slate-400 text-sm">Total XP</p>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "32px", fontWeight: "700", color: "#22c55e" }}>0</div>
+              <div style={{ fontSize: "13px", color: "#64748b" }}>Exercises Done</div>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-orange-600/20 rounded-lg">
-              <Flame className="w-6 h-6 text-orange-400" />
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "32px", fontWeight: "700", color: "#f59e0b" }}>0</div>
+              <div style={{ fontSize: "13px", color: "#64748b" }}>XP Earned</div>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{user.streak}</p>
-              <p className="text-slate-400 text-sm">Day Streak</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-600/20 rounded-lg">
-              <BookOpen className="w-6 h-6 text-green-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{user.currentChapter}/24</p>
-              <p className="text-slate-400 text-sm">Chapters Done</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-cyan-600/20 rounded-lg">
-              <Clock className="w-6 h-6 text-cyan-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">12h</p>
-              <p className="text-slate-400 text-sm">Time Learned</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {quickActions.map((action) => (
-          <Link key={action.title} href={action.href}>
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 hover:border-blue-500 transition-colors cursor-pointer group">
-              <div className="flex items-start justify-between">
-                <div className={`p-3 ${action.color} rounded-lg`}>
-                  <action.icon className="w-6 h-6 text-white" />
-                </div>
-                <ArrowRight className="w-5 h-5 text-slate-600 group-hover:text-blue-400 transition-colors" />
+            <div style={{ textAlign: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
+                <Zap style={{ width: "24px", height: "24px", color: "#ef4444" }} />
+                <span style={{ fontSize: "32px", fontWeight: "700", color: "#ef4444" }}>0</span>
               </div>
-              <h3 className="text-lg font-semibold text-white mt-4">
-                {action.title}
-              </h3>
-              <p className="text-slate-400 text-sm mt-1">
-                {action.description}
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Continue Learning Section */}
-      <h2 className="text-xl font-semibold text-white mb-4">Continue Learning</h2>
-      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-blue-600/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl font-bold text-blue-400">{user.currentChapter}</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">
-                Chapter {user.currentChapter}: Variables and Data Types
-              </h3>
-              <p className="text-slate-400 text-sm">
-                Learn how Python stores and manipulates data
-              </p>
-              <div className="flex items-center gap-4 mt-2">
-                <div className="flex-1 max-w-xs bg-slate-700 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: "35%" }} />
-                </div>
-                <span className="text-sm text-slate-400">35% complete</span>
-              </div>
+              <div style={{ fontSize: "13px", color: "#64748b" }}>Day Streak</div>
             </div>
           </div>
-          <Link href="/learn">
-            <Button leftIcon={<Play className="w-4 h-4" />}>
-              Continue
-            </Button>
-          </Link>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

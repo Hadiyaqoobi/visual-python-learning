@@ -6,14 +6,11 @@ import { useRouter } from "next/navigation";
 interface User {
   id: string;
   email: string;
-  firstName: string | null;
-  lastName: string | null;
-  avatarUrl: string | null;
-  role: "STUDENT" | "INSTRUCTOR" | "ADMIN";
-  emailVerified: boolean;
-  currentChapter: number;
+  name: string | null;
+  avatar: string | null;
   totalXp: number;
-  streak: number;
+  currentStreak: number;
+  longestStreak: number;
   lastActiveAt: string | null;
   createdAt: string;
 }
