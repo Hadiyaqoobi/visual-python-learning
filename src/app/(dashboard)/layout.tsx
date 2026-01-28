@@ -1,10 +1,10 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { Spinner } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Sidebar } from "@/components/layout/Sidebar";
 
 export default function DashboardLayout({
   children,
@@ -22,10 +22,16 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <Spinner size="xl" variant="primary" />
-          <p className="mt-4 text-slate-400">Loading...</p>
+      <div style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <Spinner size="lg" />
+          <p style={{ marginTop: "16px", color: "#64748b" }}>Loading...</p>
         </div>
       </div>
     );
@@ -36,9 +42,11 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-slate-900">
+    <div style={{ display: "flex", minHeight: "100vh", background: "#f8fafc" }}>
       <Sidebar />
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main style={{ flex: 1, overflow: "auto" }}>
+        {children}
+      </main>
     </div>
   );
 }
