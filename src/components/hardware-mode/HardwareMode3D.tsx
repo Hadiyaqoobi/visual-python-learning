@@ -251,22 +251,13 @@ function ElectronFlowPath({
   return (
     <group>
       {/* Path line (always visible but dim when inactive) */}
-      <line ref={lineRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={curvePoints.length}
-            array={new Float32Array(curvePoints.flatMap(p => [p.x, p.y, p.z]))}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
+      <Line 
+          points={curvePoints.map(p => [p.x, p.y, p.z])} 
           color={active ? color : '#333'} 
-          transparent 
+          lineWidth={2}
+          transparent
           opacity={active ? 0.6 : 0.2}
-          linewidth={2}
         />
-      </line>
       
       {/* Flowing particles */}
       {active && (
