@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import { CodeEditor } from "@/components/ide/CodeEditor";
@@ -16,9 +17,8 @@ import {
   generateAddress, 
   inferType,
 } from "@/lib/hardware/execution-orchestrator";
-import { Play, RotateCcw, Pause, StepForward, Cpu, Eye, EyeOff, Terminal, Sparkles, Box } from "lucide-react";
+import { Play, RotateCcw, Pause, StepForward, Cpu, Terminal, Sparkles } from "lucide-react";
 
-// Dynamic import for 3D Hardware Mode (client-side only)
 const HardwareModeClean = dynamic(
   () => import("@/components/hardware-mode/HardwareModeClean").then(m => m.HardwareModeClean),
   { 
@@ -36,7 +36,7 @@ const HardwareModeClean = dynamic(
         <div style={{ textAlign: 'center' }}>
           <Spinner size="lg" />
           <div style={{ color: '#00FFFF', marginTop: '16px', fontFamily: "'JetBrains Mono', monospace" }}>
-            Loading 3D Hardware Mode...
+            Loading Hardware Mode...
           </div>
         </div>
       </div>
@@ -44,7 +44,7 @@ const HardwareModeClean = dynamic(
   }
 );
 
-const STARTER_CODE = `# 🐍 Welcome to Visual Python!
+const DEFAULT_CODE = `# Welcome to Visual Python!
 # Write your code and click Run
 
 x = 5
@@ -61,7 +61,6 @@ print(f"Hello {name}!")
 print(f"Total: {total}")
 `;
 
-// Execution event type for 3D mode
 interface ExecutionEvent3D {
   type: 'ASSIGNMENT' | 'ARITHMETIC' | 'COMPARISON' | 'FUNCTION_CALL' | 'LOOP' | 'MEMORY_READ' | 'MEMORY_WRITE' | 'PRINT';
   line: number;
@@ -73,10 +72,9 @@ interface ExecutionEvent3D {
   operand2?: string;
 }
 
-export default function IDEPage() {
-  // View modes: "simple" | "hardware" | "hardware3d"
+function IDEPageContent() {
   const [viewMode, setViewMode] = useState<"simple" | "hardware" | "hardware3d">("simple");
-  const [code, setCode] = useState(STARTER_CODE);
+  const [code, setCode] = useState(DEFAULT_CODE);
   const [output, setOutput] = useState<string[]>([]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(-1);
@@ -85,8 +83,6 @@ export default function IDEPage() {
   const [playSpeed, setPlaySpeed] = useState(2000);
   const [isComplete, setIsComplete] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  
-  // 3D Mode execution events
   const [execution3DEvents, setExecution3DEvents] = useState<ExecutionEvent3D[]>([]);
   
   const [cpuState, setCpuState] = useState<CPUState>({
@@ -104,18 +100,45 @@ export default function IDEPage() {
 
   const { isLoading: isPythonLoading, isReady: isPythonReady, runCode } = usePython();
 
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    const exerciseId = searchParams.get('exercise');
+    const lessonSlug = searchParams.get('lesson');
+    
+    if (lessonSlug) {
+      fetch(`/api/curriculum/lessons/${lessonSlug}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data) {
+            if (exerciseId && data.exercises) {
+              const exercise = data.exercises.find((e: any) => e.id === exerciseId);
+              if (exercise?.starterCode) {
+                setCode(exercise.starterCode);
+                return;
+              }
+            }
+            if (data.codeExamples?.[0]?.code) {
+              setCode(data.codeExamples[0].code);
+            }
+          }
+        })
+        .catch(console.error);
+    }
+  }, [searchParams]);
+
   const handleSimpleRun = async () => {
     if (!isPythonReady) return;
     setIsRunning(true);
-    setOutput(["▶ Running..."]);
+    setOutput(["Running..."]);
     
     const result = await runCode(code);
     
     if (result.success) {
       const lines = result.output.split("\n").filter(l => l.trim());
-      setOutput(lines.length > 0 ? lines : ["✓ Code executed successfully (no output)"]);
+      setOutput(lines.length > 0 ? lines : ["Code executed successfully (no output)"]);
     } else {
-      setOutput([`❌ Error: ${result.error}`]);
+      setOutput([`Error: ${result.error}`]);
     }
     setIsRunning(false);
   };
@@ -129,7 +152,6 @@ export default function IDEPage() {
       });
   }, [code]);
 
-  // Add 3D execution event
   const add3DEvent = useCallback((event: ExecutionEvent3D) => {
     setExecution3DEvents(prev => [...prev, event]);
   }, []);
@@ -162,7 +184,6 @@ export default function IDEPage() {
       setPhases(newPhases);
       setCurrentPhaseIndex(0);
       
-      // Add 3D event
       const event3D: ExecutionEvent3D = {
         type: instruction.type === 'operation' ? 'ARITHMETIC' 
             : instruction.type === 'print' ? 'PRINT'
@@ -335,7 +356,7 @@ export default function IDEPage() {
   const handleStep = () => { if (!isComplete) executePhase(); };
   const handlePlayPause = () => { setIsAutoPlaying(prev => !prev); };
   
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setCurrentLineIndex(0);
     setCurrentPhaseIndex(-1);
     setPhases([]);
@@ -349,12 +370,12 @@ export default function IDEPage() {
     setExecution3DEvents([]);
     setIsRunning(false);
     variablesRef.current.clear();
-  };
+  }, []);
 
   const handleCodeChange = useCallback((newCode: string) => {
     setCode(newCode);
     handleReset();
-  }, []);
+  }, [handleReset]);
 
   const executableLines = getExecutableLines();
   const currentLine = currentLineIndex >= 0 && currentLineIndex < executableLines.length
@@ -364,7 +385,6 @@ export default function IDEPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: viewMode === "hardware3d" ? "#0A0A1E" : "#f8fafc" }}>
-      {/* Toolbar */}
       <div style={{
         display: "flex",
         alignItems: "center",
@@ -469,9 +489,9 @@ export default function IDEPage() {
                   cursor: "pointer",
                 }}
               >
-                <option value={3000}>🐢 Slow</option>
-                <option value={2000}>🚶 Normal</option>
-                <option value={1000}>🏃 Fast</option>
+                <option value={3000}>Slow</option>
+                <option value={2000}>Normal</option>
+                <option value={1000}>Fast</option>
               </select>
             </>
           )}
@@ -498,7 +518,6 @@ export default function IDEPage() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {/* Mode Toggle Buttons */}
           <div style={{
             display: "flex",
             borderRadius: "10px",
@@ -553,7 +572,7 @@ export default function IDEPage() {
                 border: "none",
                 background: viewMode === "hardware3d" 
                   ? "linear-gradient(135deg, #00AAFF, #FF00FF)" 
-                  : (viewMode === "hardware3d" ? "#1a1a2e" : "#fff"),
+                  : "#fff",
                 color: viewMode === "hardware3d" ? "#fff" : "#64748b",
                 fontSize: "12px",
                 fontWeight: "600",
@@ -591,7 +610,7 @@ export default function IDEPage() {
               background: isComplete ? "#22c55e" : cpuState.isActive ? "#3b82f6" : "#94a3b8",
               boxShadow: (isComplete || cpuState.isActive) ? `0 0 8px ${isComplete ? '#22c55e' : '#3b82f6'}` : 'none',
             }} />
-            {isComplete ? "✓ Complete" : cpuState.isActive ? "Running..." : "Ready"}
+            {isComplete ? "Complete" : cpuState.isActive ? "Running..." : "Ready"}
           </div>
         </div>
       </div>
@@ -612,9 +631,7 @@ export default function IDEPage() {
         </div>
       )}
 
-      {/* Main Content */}
       <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
-        {/* Code Editor */}
         <div style={{
           width: viewMode === "simple" ? "50%" : "320px",
           display: "flex",
@@ -626,22 +643,21 @@ export default function IDEPage() {
           <div style={{
             padding: "12px 20px",
             background: "#0f172a",
-            borderBottom: "#334155",
+            borderBottom: "1px solid #334155",
             display: "flex",
             alignItems: "center",
             gap: "10px",
           }}>
-            <span style={{ fontSize: "16px" }}>📝</span>
-            <span style={{ fontSize: "13px", color: "#e2e8f0", fontWeight: "600" }}>Code Editor</span>
-            {viewMode === "hardware3d" && currentLine && (
+            <span style={{ fontSize: "16px" }}>Code Editor</span>
+            {currentLine && (
               <span style={{
                 marginLeft: "auto",
                 fontSize: "11px",
                 padding: "4px 10px",
                 borderRadius: "12px",
-                background: "linear-gradient(135deg, #00AAFF22, #FF00FF22)",
-                color: "#00FFFF",
-                border: "1px solid #00AAFF44",
+                background: viewMode === "hardware3d" ? "linear-gradient(135deg, #00AAFF22, #FF00FF22)" : "#334155",
+                color: viewMode === "hardware3d" ? "#00FFFF" : "#94a3b8",
+                border: viewMode === "hardware3d" ? "1px solid #00AAFF44" : "none",
               }}>
                 Line {currentLine.index}
               </span>
@@ -660,7 +676,6 @@ export default function IDEPage() {
           </div>
         </div>
 
-        {/* Simple Mode: Output Panel */}
         {viewMode === "simple" && (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#ffffff" }}>
             <div style={{
@@ -684,9 +699,9 @@ export default function IDEPage() {
             }}>
               {output.length === 0 ? (
                 <div style={{ color: "#64748b", lineHeight: "1.8" }}>
-                  <p>👋 Click <strong style={{ color: "#22c55e" }}>Run Code</strong> to execute your Python code</p>
+                  <p>Click <strong style={{ color: "#22c55e" }}>Run Code</strong> to execute your Python code</p>
                   <p style={{ marginTop: "12px", fontSize: "13px" }}>
-                    💡 Try <strong style={{ color: "#818cf8" }}>2D Hardware</strong> or <strong style={{ color: "#00FFFF" }}>3D Mode</strong> to visualize execution
+                    Try <strong style={{ color: "#818cf8" }}>2D Hardware</strong> or <strong style={{ color: "#00FFFF" }}>3D Mode</strong> to visualize execution
                   </p>
                 </div>
               ) : (
@@ -696,7 +711,7 @@ export default function IDEPage() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     style={{
-                      color: line.startsWith("❌") ? "#f87171" : line.startsWith("▶") ? "#60a5fa" : "#4ade80",
+                      color: line.startsWith("Error") ? "#f87171" : line.startsWith("Running") ? "#60a5fa" : "#4ade80",
                       marginBottom: "6px",
                       fontSize: "14px",
                     }}
@@ -709,7 +724,6 @@ export default function IDEPage() {
           </div>
         )}
 
-        {/* 2D Hardware Mode */}
         <AnimatePresence>
           {viewMode === "hardware" && (
             <>
@@ -758,7 +772,7 @@ export default function IDEPage() {
                       padding: "16px",
                     }}>
                       <div style={{ fontSize: "11px", color: "#64748b", marginBottom: "10px", fontWeight: "600", letterSpacing: "0.5px" }}>
-                        📤 CONSOLE OUTPUT
+                        CONSOLE OUTPUT
                       </div>
                       {output.map((line, i) => (
                         <div key={i} style={{ color: "#059669", fontFamily: "monospace", fontSize: "14px", fontWeight: "600" }}>
@@ -790,8 +804,7 @@ export default function IDEPage() {
                   alignItems: "center",
                   gap: "10px",
                 }}>
-                  <span style={{ fontSize: "16px" }}>💡</span>
-                  <span style={{ fontSize: "13px", color: "#334155", fontWeight: "600" }}>Explanation</span>
+                  <span style={{ fontSize: "16px" }}>Explanation</span>
                 </div>
                 <div style={{ flex: 1, overflow: "auto", padding: "16px" }}>
                   <ExplanationPanel
@@ -805,7 +818,6 @@ export default function IDEPage() {
           )}
         </AnimatePresence>
 
-        {/* 3D Hardware Mode */}
         <AnimatePresence>
           {viewMode === "hardware3d" && (
             <motion.div
@@ -827,7 +839,6 @@ export default function IDEPage() {
                 code={code}
               />
               
-              {/* Output overlay for 3D mode */}
               {output.length > 0 && (
                 <div style={{
                   position: "absolute",
@@ -847,7 +858,7 @@ export default function IDEPage() {
                     fontWeight: "600",
                     fontFamily: "'JetBrains Mono', monospace",
                   }}>
-                    📤 OUTPUT
+                    OUTPUT
                   </div>
                   {output.map((line, i) => (
                     <div key={i} style={{ 
@@ -866,5 +877,23 @@ export default function IDEPage() {
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+export default function IDEPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        height: '100vh', 
+        background: '#f8fafc' 
+      }}>
+        <Spinner size="lg" />
+      </div>
+    }>
+      <IDEPageContent />
+    </Suspense>
   );
 }
