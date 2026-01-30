@@ -57,6 +57,26 @@ const LogicGates3D = dynamic(
   { ssr: false, loading: () => <LoadingPlaceholder text="Loading Logic Gates 3D..." /> }
 );
 
+const ControlUnit3D = dynamic(
+  () => import("@/components/hardware/cpu3d/ControlUnit3D").then(mod => mod.ControlUnit3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Control Unit 3D..." /> }
+);
+
+const CPUBuilder3D = dynamic(
+  () => import("@/components/hardware/cpu3d/CPUBuilder3D").then(mod => mod.CPUBuilder3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading CPU Builder 3D..." /> }
+);
+
+const InstructionDecoder3D = dynamic(
+  () => import("@/components/hardware/cpu3d/InstructionDecoder3D").then(mod => mod.InstructionDecoder3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Instruction Decoder 3D..." /> }
+);
+
+const FDECycle3D = dynamic(
+  () => import("@/components/hardware/cpu3d/FDECycle3D").then(mod => mod.FDECycle3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading FDE Cycle 3D..." /> }
+);
+
 const RegisterFile3D = dynamic(
   () => import("@/components/hardware/digital3d/RegisterFile3D").then(mod => mod.RegisterFile3D),
   { ssr: false, loading: () => <LoadingPlaceholder text="Loading Register File 3D..." /> }
@@ -167,41 +187,45 @@ const LESSONS: Record<string, {
   },
   h6: {
     id: "H6",
-    title: "Control Unit Conductor",
+    title: "Control Unit 3D",
     module: "CPU Architecture",
     moduleColor: "#f97316",
     description: "The orchestrator that coordinates all CPU operations",
-    component: ControlUnit,
+    component: ControlUnit3D,
+    is3D: true,
     prev: "h5",
     next: "h7",
   },
   h7: {
     id: "H7",
-    title: "CPU Builder",
+    title: "CPU Builder 3D",
     module: "CPU Architecture",
     moduleColor: "#f97316",
     description: "Build a CPU by connecting components together",
-    component: CPUBuilder,
+    component: CPUBuilder3D,
+    is3D: true,
     prev: "h6",
     next: "h8",
   },
   h8: {
     id: "H8",
-    title: "Instruction Decoder",
+    title: "Instruction Decoder 3D",
     module: "CPU Architecture",
     moduleColor: "#f97316",
     description: "How the CPU understands machine code instructions",
-    component: InstructionDecoder,
+    component: InstructionDecoder3D,
+    is3D: true,
     prev: "h7",
     next: "h9",
   },
   h9: {
     id: "H9",
-    title: "Complete FDE Cycle",
+    title: "FDE Cycle 3D",
     module: "CPU Architecture",
     moduleColor: "#f97316",
     description: "Fetch-Decode-Execute: the heartbeat of the CPU",
-    component: FDECycle,
+    component: FDECycle3D,
+    is3D: true,
     prev: "h8",
     next: "h10",
   },
