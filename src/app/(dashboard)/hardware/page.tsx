@@ -28,7 +28,7 @@ const HARDWARE_MODULES = [
     lessons: [
       { id: "H1", title: "Binary Matrix 3D", description: "Floating glowing cubes with particle effects", is3D: true },
       { id: "H2", title: "Logic Gates 3D Circuit Lab", description: "3D gates with electron flow", is3D: true },
-      { id: "H3", title: "Animated Adder", description: "Binary addition with carry propagation", is3D: false },
+      { id: "H3", title: "Binary Calculator 3D", description: "Ripple carry addition animation", is3D: true },
       { id: "H4", title: "ALU Computation Chamber", description: "3D ALU with data particle streams", is3D: true },
       { id: "H5", title: "Register File Explorer", description: "CPU registers and speed comparison", is3D: false },
     ],
@@ -151,7 +151,7 @@ export default function HardwarePage() {
           </div>
           <div style={{
             padding: "12px 20px",
-            background: "rgba(255, 0, 255, 0.1)",
+            background: "linear-gradient(135deg, rgba(0, 170, 255, 0.1), rgba(255, 0, 255, 0.1))",
             border: "1px solid rgba(255, 0, 255, 0.2)",
             borderRadius: 12,
             display: "flex",
@@ -160,291 +160,243 @@ export default function HardwarePage() {
           }}>
             <Sparkles style={{ width: 18, height: 18, color: "#FF00FF" }} />
             <span style={{ color: "white", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
-              {total3DLessons} 3D Experiences
+              {total3DLessons} Interactive 3D
             </span>
           </div>
           <div style={{
             padding: "12px 20px",
-            background: "rgba(0, 255, 136, 0.1)",
-            border: "1px solid rgba(0, 255, 136, 0.2)",
+            background: "rgba(34, 197, 94, 0.1)",
+            border: "1px solid rgba(34, 197, 94, 0.2)",
             borderRadius: 12,
             display: "flex",
             alignItems: "center",
             gap: 8,
           }}>
-            <Layers style={{ width: 18, height: 18, color: "#00FF88" }} />
+            <CheckCircle style={{ width: 18, height: 18, color: "#22c55e" }} />
             <span style={{ color: "white", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
-              5 Modules
-            </span>
-          </div>
-          <div style={{
-            padding: "12px 20px",
-            background: "linear-gradient(135deg, rgba(0, 170, 255, 0.2), rgba(255, 0, 255, 0.2))",
-            border: "1px solid rgba(0, 255, 255, 0.3)",
-            borderRadius: 12,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}>
-            <Play style={{ width: 18, height: 18, color: "#00FFFF" }} />
-            <span style={{ color: "white", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
-              Interactive
+              {completedLessons.length} Completed
             </span>
           </div>
         </div>
       </div>
 
-      {/* Module List */}
-      <div style={{ padding: "30px 40px" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 900 }}>
-          {HARDWARE_MODULES.map((module) => {
-            const Icon = module.icon;
-            const isExpanded = expandedModule === module.id;
-            const moduleCompleted = module.lessons.filter(l => completedLessons.includes(l.id)).length;
-            const has3D = module.lessons.some(l => l.is3D);
+      {/* Modules */}
+      <div style={{ padding: "24px 40px" }}>
+        {HARDWARE_MODULES.map((module, moduleIndex) => {
+          const ModuleIcon = module.icon;
+          const isExpanded = expandedModule === module.id;
+          const completedInModule = module.lessons.filter(l => completedLessons.includes(l.id)).length;
 
-            return (
-              <motion.div
-                key={module.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: module.id * 0.1 }}
+          return (
+            <motion.div
+              key={module.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: moduleIndex * 0.1 }}
+              style={{
+                marginBottom: 16,
+                borderRadius: 16,
+                overflow: "hidden",
+                border: `1px solid ${module.color}33`,
+                background: "rgba(0, 0, 0, 0.3)",
+              }}
+            >
+              {/* Module Header */}
+              <motion.button
+                onClick={() => setExpandedModule(isExpanded ? null : module.id)}
+                whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}
                 style={{
-                  background: "rgba(20, 20, 40, 0.8)",
-                  borderRadius: 16,
-                  border: "1px solid rgba(0, 255, 255, 0.1)",
-                  overflow: "hidden",
-                  backdropFilter: "blur(10px)",
+                  width: "100%",
+                  padding: "20px 24px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
                 }}
               >
-                {/* Module Header */}
-                <button
-                  onClick={() => setExpandedModule(isExpanded ? null : module.id)}
-                  style={{
-                    width: "100%",
-                    padding: "20px 24px",
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 16,
-                  }}
-                >
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                   <div style={{
                     width: 48,
                     height: 48,
                     borderRadius: 12,
-                    background: `linear-gradient(135deg, ${module.color}, ${module.color}88)`,
+                    background: `linear-gradient(135deg, ${module.color}33, ${module.color}11)`,
+                    border: `2px solid ${module.color}`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     boxShadow: `0 0 20px ${module.color}44`,
                   }}>
-                    <Icon style={{ width: 24, height: 24, color: "white" }} />
+                    <ModuleIcon style={{ width: 24, height: 24, color: module.color }} />
                   </div>
-                  
-                  <div style={{ flex: 1, textAlign: "left" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <h3 style={{ 
-                        fontSize: 18, 
-                        fontWeight: 600, 
-                        color: "white", 
-                        margin: 0,
-                        fontFamily: "'JetBrains Mono', monospace",
-                      }}>
-                        Module {module.id}: {module.name}
-                      </h3>
-                      <span style={{
-                        fontSize: 11,
-                        padding: "2px 8px",
-                        borderRadius: 6,
-                        background: "rgba(0, 255, 255, 0.1)",
-                        color: "#00FFFF",
-                        fontFamily: "'JetBrains Mono', monospace",
-                      }}>
-                        {module.lessons.length} lessons
-                      </span>
-                      {has3D && (
-                        <span style={{
-                          fontSize: 10,
-                          padding: "2px 8px",
-                          borderRadius: 6,
-                          background: "linear-gradient(135deg, #00AAFF, #FF00FF)",
-                          color: "white",
-                          fontWeight: 600,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 4,
-                        }}>
-                          <Sparkles style={{ width: 10, height: 10 }} />
-                          3D
-                        </span>
-                      )}
-                    </div>
-                    <p style={{ fontSize: 13, color: "#666", margin: "4px 0 0" }}>
+                  <div>
+                    <h3 style={{ 
+                      fontSize: 18, 
+                      fontWeight: 700, 
+                      color: "white", 
+                      margin: 0,
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}>
+                      Module {module.id}: {module.name}
+                    </h3>
+                    <p style={{ fontSize: 13, color: "#888", margin: "4px 0 0" }}>
                       {module.description}
                     </p>
                   </div>
+                </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <span style={{ fontSize: 13, color: "#666", fontFamily: "'JetBrains Mono', monospace" }}>
-                      {moduleCompleted}/{module.lessons.length}
-                    </span>
-                    {isExpanded ? (
-                      <ChevronUp style={{ width: 20, height: 20, color: "#00FFFF" }} />
-                    ) : (
-                      <ChevronDown style={{ width: 20, height: 20, color: "#666" }} />
-                    )}
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <div style={{
+                    padding: "6px 12px",
+                    borderRadius: 20,
+                    background: completedInModule > 0 ? "rgba(34, 197, 94, 0.2)" : "rgba(255, 255, 255, 0.1)",
+                    color: completedInModule > 0 ? "#22c55e" : "#888",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}>
+                    {completedInModule}/{module.lessons.length}
                   </div>
-                </button>
-
-                {/* Lessons */}
-                {isExpanded && (
                   <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    style={{
-                      borderTop: "1px solid rgba(0, 255, 255, 0.1)",
-                      padding: "16px 24px",
-                    }}
+                    animate={{ rotate: isExpanded ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {module.lessons.map((lesson, idx) => {
-                        const isCompleted = completedLessons.includes(lesson.id);
-                        const lessonHref = "/hardware/" + lesson.id.toLowerCase();
+                    <ChevronDown style={{ width: 24, height: 24, color: "#888" }} />
+                  </motion.div>
+                </div>
+              </motion.button>
 
-                        return (
-                          <Link
-                            key={lesson.id}
-                            href={lessonHref}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 12,
-                              padding: "14px 16px",
-                              background: lesson.is3D 
-                                ? "linear-gradient(135deg, rgba(0, 170, 255, 0.1), rgba(255, 0, 255, 0.1))"
-                                : "rgba(30, 30, 50, 0.5)",
-                              borderRadius: 10,
-                              textDecoration: "none",
-                              transition: "all 0.2s",
-                              border: lesson.is3D 
-                                ? "1px solid rgba(0, 255, 255, 0.2)" 
-                                : "1px solid transparent",
-                            }}
-                            onMouseOver={(e) => {
-                              e.currentTarget.style.background = lesson.is3D
-                                ? "linear-gradient(135deg, rgba(0, 170, 255, 0.2), rgba(255, 0, 255, 0.2))"
-                                : "rgba(40, 40, 70, 0.8)";
-                              e.currentTarget.style.borderColor = "rgba(0, 255, 255, 0.3)";
-                              e.currentTarget.style.transform = "translateX(4px)";
-                            }}
-                            onMouseOut={(e) => {
-                              e.currentTarget.style.background = lesson.is3D
-                                ? "linear-gradient(135deg, rgba(0, 170, 255, 0.1), rgba(255, 0, 255, 0.1))"
-                                : "rgba(30, 30, 50, 0.5)";
-                              e.currentTarget.style.borderColor = lesson.is3D 
-                                ? "rgba(0, 255, 255, 0.2)" 
-                                : "transparent";
-                              e.currentTarget.style.transform = "translateX(0)";
-                            }}
-                          >
+              {/* Lessons */}
+              <motion.div
+                initial={false}
+                animate={{
+                  height: isExpanded ? "auto" : 0,
+                  opacity: isExpanded ? 1 : 0,
+                }}
+                transition={{ duration: 0.3 }}
+                style={{ overflow: "hidden" }}
+              >
+                <div style={{ padding: "0 24px 20px" }}>
+                  {module.lessons.map((lesson, lessonIndex) => {
+                    const isCompleted = completedLessons.includes(lesson.id);
+
+                    return (
+                      <Link 
+                        key={lesson.id}
+                        href={`/hardware/lesson/${lesson.id}`}
+                        style={{ textDecoration: "none" }}
+                      >
+                        <motion.div
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: lessonIndex * 0.05 }}
+                          whileHover={{ 
+                            backgroundColor: "rgba(255, 255, 255, 0.05)",
+                            x: 4,
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "16px 20px",
+                            borderRadius: 12,
+                            marginBottom: 8,
+                            border: `1px solid ${lesson.is3D ? '#00FFFF22' : 'rgba(255, 255, 255, 0.1)'}`,
+                            background: lesson.is3D 
+                              ? "linear-gradient(135deg, rgba(0, 170, 255, 0.05), rgba(255, 0, 255, 0.05))"
+                              : "transparent",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                             <div style={{
-                              width: 32,
-                              height: 32,
-                              borderRadius: 8,
+                              width: 36,
+                              height: 36,
+                              borderRadius: 10,
                               background: isCompleted 
-                                ? "#22c55e" 
+                                ? "linear-gradient(135deg, #22c55e, #16a34a)"
                                 : lesson.is3D
-                                  ? "linear-gradient(135deg, #00AAFF, #FF00FF)"
-                                  : `${module.color}40`,
+                                  ? "linear-gradient(135deg, #00AAFF22, #FF00FF22)"
+                                  : "rgba(255, 255, 255, 0.1)",
+                              border: isCompleted 
+                                ? "none"
+                                : lesson.is3D
+                                  ? "1px solid #00FFFF44"
+                                  : "1px solid rgba(255, 255, 255, 0.2)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              color: isCompleted || lesson.is3D ? "white" : module.color,
-                              fontSize: 14,
-                              fontWeight: 600,
+                              color: isCompleted ? "white" : lesson.is3D ? "#00FFFF" : "#888",
+                              fontSize: 13,
+                              fontWeight: 700,
                               fontFamily: "'JetBrains Mono', monospace",
                             }}>
-                              {isCompleted ? (
-                                <CheckCircle style={{ width: 18, height: 18 }} />
-                              ) : lesson.is3D ? (
-                                <Sparkles style={{ width: 16, height: 16 }} />
-                              ) : (
-                                idx + 1
-                              )}
+                              {isCompleted ? <CheckCircle style={{ width: 18, height: 18 }} /> : lesson.id}
                             </div>
-                            
-                            <div style={{ flex: 1 }}>
-                              <div style={{ 
-                                fontSize: 14, 
-                                fontWeight: 500, 
-                                color: "white",
-                                fontFamily: "'JetBrains Mono', monospace",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 8,
-                              }}>
-                                {lesson.title}
+                            <div>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <h4 style={{ 
+                                  fontSize: 15, 
+                                  fontWeight: 600, 
+                                  color: "white", 
+                                  margin: 0,
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                }}>
+                                  {lesson.title}
+                                </h4>
                                 {lesson.is3D && (
-                                  <span style={{
-                                    fontSize: 9,
-                                    padding: "1px 6px",
-                                    borderRadius: 4,
-                                    background: "rgba(255, 0, 255, 0.3)",
-                                    color: "#FF88FF",
+                                  <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    padding: "2px 8px",
+                                    borderRadius: 8,
+                                    background: "linear-gradient(135deg, #00AAFF, #FF00FF)",
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    color: "white",
                                   }}>
+                                    <Sparkles style={{ width: 10, height: 10 }} />
                                     3D
-                                  </span>
+                                  </div>
                                 )}
                               </div>
-                              <div style={{ fontSize: 12, color: "#666" }}>
+                              <p style={{ fontSize: 12, color: "#666", margin: "4px 0 0" }}>
                                 {lesson.description}
-                              </div>
+                              </p>
                             </div>
+                          </div>
 
-                            <div style={{
-                              padding: "6px 12px",
-                              borderRadius: 6,
-                              background: lesson.is3D 
+                          <motion.div
+                            whileHover={{ scale: 1.1 }}
+                            style={{
+                              width: 36,
+                              height: 36,
+                              borderRadius: "50%",
+                              background: lesson.is3D
                                 ? "linear-gradient(135deg, #00AAFF, #FF00FF)"
                                 : module.color,
-                              color: "white",
-                              fontSize: 11,
-                              fontWeight: 600,
-                              fontFamily: "'JetBrains Mono', monospace",
-                              boxShadow: lesson.is3D ? "0 0 15px rgba(0, 170, 255, 0.4)" : "none",
-                            }}>
-                              {lesson.is3D ? "EXPLORE →" : "Start →"}
-                            </div>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              boxShadow: lesson.is3D
+                                ? "0 0 20px rgba(0, 170, 255, 0.4)"
+                                : `0 0 15px ${module.color}44`,
+                            }}
+                          >
+                            <Play style={{ width: 16, height: 16, color: "white", marginLeft: 2 }} />
+                          </motion.div>
+                        </motion.div>
+                      </Link>
+                    );
+                  })}
+                </div>
               </motion.div>
-            );
-          })}
-        </div>
-      </div>
-      
-      {/* Footer info */}
-      <div style={{ 
-        padding: "30px 40px", 
-        borderTop: "1px solid rgba(0, 255, 255, 0.1)",
-        textAlign: "center",
-      }}>
-        <p style={{ 
-          color: "#444", 
-          fontSize: 12, 
-          fontFamily: "'JetBrains Mono', monospace",
-          margin: 0,
-        }}>
-          Built with Three.js • React Three Fiber • WebGL
-        </p>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
