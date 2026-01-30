@@ -15,12 +15,14 @@ import {
   ChevronRight,
   Zap,
   Settings,
+  Cpu,
 } from "lucide-react";
 import { useState } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Learn", href: "/learn", icon: BookOpen },
+  { name: "Hardware", href: "/hardware", icon: Cpu },
   { name: "Python IDE", href: "/ide", icon: Code },
   { name: "Progress", href: "/progress", icon: BarChart3 },
   { name: "Achievements", href: "/achievements", icon: Trophy },
@@ -180,6 +182,7 @@ export function Sidebar() {
             const isActive =
               pathname === item.href || pathname?.startsWith(item.href + "/");
             const Icon = item.icon;
+            const isHardware = item.name === "Hardware";
 
             return (
               <Link key={item.name} href={item.href} style={{ textDecoration: "none" }}>
@@ -192,7 +195,9 @@ export function Sidebar() {
                     padding: isCollapsed ? 14 : "14px 18px",
                     borderRadius: 12,
                     background: isActive
-                      ? "linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%)"
+                      ? isHardware
+                        ? "linear-gradient(135deg, rgba(249, 115, 22, 0.3) 0%, rgba(234, 88, 12, 0.3) 100%)"
+                        : "linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%)"
                       : "transparent",
                     color: isActive ? "#ffffff" : "#a5b4fc",
                     fontWeight: isActive ? 600 : 500,
@@ -210,6 +215,19 @@ export function Sidebar() {
                     <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                       {item.name}
                     </motion.span>
+                  )}
+                  {!isCollapsed && isHardware && (
+                    <span style={{
+                      marginLeft: "auto",
+                      fontSize: 10,
+                      padding: "2px 6px",
+                      borderRadius: 6,
+                      background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+                      color: "white",
+                      fontWeight: 600,
+                    }}>
+                      NEW
+                    </span>
                   )}
                 </motion.div>
               </Link>
