@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { 
   Cpu, 
   Binary, 
@@ -89,7 +90,6 @@ export default function HardwarePage() {
   const [completedLessons] = useState<string[]>([]);
 
   const totalLessons = HARDWARE_MODULES.reduce((sum, m) => sum + m.lessons.length, 0);
-  const completedCount = completedLessons.length;
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%)" }}>
@@ -253,12 +253,13 @@ export default function HardwarePage() {
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {module.lessons.map((lesson, idx) => {
                         const isCompleted = completedLessons.includes(lesson.id);
-                        const isLocked = false; // Could add logic for locked lessons
+                        const isLocked = false;
+                        const lessonHref = "/hardware/" + lesson.id.toLowerCase();
 
                         return (
-                          
+                          <Link
                             key={lesson.id}
-                            href={`/hardware/${lesson.id.toLowerCase()}`}
+                            href={lessonHref}
                             style={{
                               display: "flex",
                               alignItems: "center",
@@ -319,7 +320,7 @@ export default function HardwarePage() {
                             }}>
                               Start →
                             </div>
-                          </a>
+                          </Link>
                         );
                       })}
                     </div>
