@@ -57,6 +57,61 @@ const LogicGates3D = dynamic(
   { ssr: false, loading: () => <LoadingPlaceholder text="Loading Logic Gates 3D..." /> }
 );
 
+const CompilerPipeline3D = dynamic(
+  () => import("@/components/hardware/bridge3d/CompilerPipeline3D").then(mod => mod.CompilerPipeline3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Compiler Pipeline 3D..." /> }
+);
+
+const StackVisualizer3D = dynamic(
+  () => import("@/components/hardware/bridge3d/StackVisualizer3D").then(mod => mod.StackVisualizer3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Stack Visualizer 3D..." /> }
+);
+
+const HeapVisualizer3D = dynamic(
+  () => import("@/components/hardware/bridge3d/HeapVisualizer3D").then(mod => mod.HeapVisualizer3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Heap Visualizer 3D..." /> }
+);
+
+const SystemTrace3D = dynamic(
+  () => import("@/components/hardware/integration3d/SystemTrace3D").then(mod => mod.SystemTrace3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading System Trace 3D..." /> }
+);
+
+const PerformanceLab3D = dynamic(
+  () => import("@/components/hardware/integration3d/PerformanceLab3D").then(mod => mod.PerformanceLab3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Performance Lab 3D..." /> }
+);
+
+const HardwareMaster3D = dynamic(
+  () => import("@/components/hardware/integration3d/HardwareMaster3D").then(mod => mod.HardwareMaster3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Hardware Master 3D..." /> }
+);
+
+const OSScheduler3D = dynamic(
+  () => import("@/components/hardware/bridge3d/OSScheduler3D").then(mod => mod.OSScheduler3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading OS Scheduler 3D..." /> }
+);
+
+const MemoryPyramid3D = dynamic(
+  () => import("@/components/hardware/memory3d/MemoryPyramid3D").then(mod => mod.MemoryPyramid3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Memory Pyramid 3D..." /> }
+);
+
+const CacheSimulator3D = dynamic(
+  () => import("@/components/hardware/memory3d/CacheSimulator3D").then(mod => mod.CacheSimulator3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Cache Simulator 3D..." /> }
+);
+
+const RAMExplorer3D = dynamic(
+  () => import("@/components/hardware/memory3d/RAMExplorer3D").then(mod => mod.RAMExplorer3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading RAM Explorer 3D..." /> }
+);
+
+const MemoryJourney3D = dynamic(
+  () => import("@/components/hardware/memory3d/MemoryJourney3D").then(mod => mod.MemoryJourney3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Memory Journey 3D..." /> }
+);
+
 const ControlUnit3D = dynamic(
   () => import("@/components/hardware/cpu3d/ControlUnit3D").then(mod => mod.ControlUnit3D),
   { ssr: false, loading: () => <LoadingPlaceholder text="Loading Control Unit 3D..." /> }
@@ -231,111 +286,122 @@ const LESSONS: Record<string, {
   },
   h10: {
     id: "H10",
-    title: "Memory Pyramid",
+    title: "Memory Pyramid 3D",
     module: "Memory Systems",
     moduleColor: "#22c55e",
     description: "The memory hierarchy from registers to disk",
-    component: MemoryPyramid,
+    component: MemoryPyramid3D,
+    is3D: true,
     prev: "h9",
     next: "h11",
   },
   h11: {
     id: "H11",
-    title: "Cache Simulator",
+    title: "Cache Simulator 3D",
     module: "Memory Systems",
     moduleColor: "#22c55e",
     description: "Experience cache hits and misses",
-    component: CacheSimulator,
+    component: CacheSimulator3D,
+    is3D: true,
     prev: "h10",
     next: "h12",
   },
   h12: {
     id: "H12",
-    title: "RAM Explorer",
+    title: "RAM Explorer 3D",
     module: "Memory Systems",
     moduleColor: "#22c55e",
     description: "Explore addressable memory like real RAM",
-    component: RAMExplorer,
+    component: RAMExplorer3D,
+    is3D: true,
     prev: "h11",
     next: "h13",
   },
   h13: {
     id: "H13",
-    title: "Memory System Journey",
+    title: "Memory Journey 3D",
     module: "Memory Systems",
     moduleColor: "#22c55e",
     description: "Follow data through the complete memory hierarchy",
-    component: MemorySystemJourney,
+    component: MemoryJourney3D,
+    is3D: true,
     prev: "h12",
     next: "h14",
   },
   h14: {
     id: "H14",
-    title: "Code Transformer",
+    title: "Compiler Pipeline 3D",
     module: "Software-Hardware Bridge",
     moduleColor: "#8b5cf6",
     description: "Watch Python transform to machine code",
-    component: CodeTransformer,
+    component: CompilerPipeline3D,
+    is3D: true,
     prev: "h13",
     next: "h15",
   },
   h15: {
     id: "H15",
-    title: "Variable Memory",
+    title: "Heap Visualizer 3D",
     module: "Software-Hardware Bridge",
     moduleColor: "#8b5cf6",
     description: "See how Python variables live in memory",
-    component: VariableMemory,
+    component: HeapVisualizer3D,
+    is3D: true,
     prev: "h14",
     next: "h16",
   },
   h16: {
     id: "H16",
-    title: "Call Stack Visualizer",
+    title: "Stack Visualizer 3D",
     module: "Software-Hardware Bridge",
     moduleColor: "#8b5cf6",
     description: "Watch function calls create stack frames",
-    component: CallStackVisualizer,
+    component: StackVisualizer3D,
+    is3D: true,
     prev: "h15",
     next: "h17",
   },
   h17: {
     id: "H17",
-    title: "CPU Execution Simulator",
+    title: "OS Scheduler 3D",
     module: "Software-Hardware Bridge",
     moduleColor: "#8b5cf6",
-    description: "See Python operations as CPU instructions",
-    component: CPUExecutionSimulator,
+    description: "See how the OS manages processes",
+    component: OSScheduler3D,
+    is3D: true,
     prev: "h16",
     next: "h18",
   },
   h18: {
     id: "H18",
-    title: "Complete System Trace",
+    title: "System Trace 3D",
     module: "Integration & Synthesis",
     moduleColor: "#ec4899",
     description: "Trace an operation through the entire computer",
-    component: CompleteSystemTrace,
+    component: SystemTrace3D,
+    is3D: true,
     prev: "h17",
     next: "h19",
   },
   h19: {
     id: "H19",
-    title: "Side-by-Side View",
+    title: "Performance Lab 3D",
     module: "Integration & Synthesis",
     moduleColor: "#ec4899",
-    description: "Python and hardware executing together",
-    component: SideBySideView,
+    description: "Compare coding patterns and their hardware impact",
+    component: PerformanceLab3D,
+    is3D: true,
     prev: "h18",
     next: "h20",
   },
   h20: {
     id: "H20",
-    title: "Mental Model Builder",
+    title: "Hardware Master Quiz",
     module: "Integration & Synthesis",
     moduleColor: "#ec4899",
-    description: "Review and test your hardware knowledge",
-    component: MentalModelBuilder,
+    description: "Test your hardware knowledge",
+    component: HardwareMaster3D,
+    is3D: true,
     prev: "h19",
   },
 };
