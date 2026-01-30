@@ -2585,8 +2585,7 @@ for word, count in sorted(result.items()):
   const exerciseCount = await prisma.exercise.count({ where: { lesson: { section: { chapter: { number: 10 } } } } });
 
   console.log("\n📊 Chapter 10 Summary:");
-  console cat >> prisma/seed-chapter10.ts << 'ENDOFFILE'
-.log(`   Lessons: ${lessonCount}`);
+  console.log(`   Lessons: ${lessonCount}`);
   console.log(`   Exercises: ${exerciseCount}`);
   console.log("\n🌱 Chapter 10 seeding complete!");
 }
