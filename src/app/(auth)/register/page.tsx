@@ -1,23 +1,39 @@
-import { RegisterForm } from "@/components/auth/RegisterForm";
+"use client";
 
-export const metadata = {
-  title: "Create Account - Visual Python Learning",
-  description: "Create your account and start learning Python with visual execution",
-};
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import { AuthBackground } from "@/components/auth/AuthBackground";
+import { motion } from "framer-motion";
+import { Code2, Sparkles } from "lucide-react";
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Visual Python Learning
-          </h1>
-          <p className="text-gray-600">
-            Learn Python by seeing how your code executes
+    <div style={{ minHeight: "100vh", position: "relative" }}>
+      <AuthBackground />
+      <div style={{
+        position: "relative",
+        zIndex: 1,
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "40px 24px",
+      }}>
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: "center", marginBottom: "24px" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "14px", marginBottom: "12px" }}>
+            <div style={{ width: "50px", height: "50px", borderRadius: "14px", background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 30px rgba(99, 102, 241, 0.5)" }}>
+              <Code2 style={{ width: "26px", height: "26px", color: "white" }} />
+            </div>
+            <h1 style={{ fontSize: "28px", fontWeight: "800", color: "white" }}>Visual Python</h1>
+          </div>
+          <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <Sparkles style={{ width: "16px", height: "16px", color: "#fbbf24" }} />
+            Begin your visual learning journey
           </p>
+        </motion.div>
+        <div style={{ width: "100%", maxWidth: "400px" }}>
+          <RegisterForm />
         </div>
-        <RegisterForm />
+        <p style={{ marginTop: "24px", fontSize: "12px", color: "rgba(255,255,255,0.4)", paddingBottom: "20px" }}>🔒 Free forever • No credit card required</p>
       </div>
     </div>
   );

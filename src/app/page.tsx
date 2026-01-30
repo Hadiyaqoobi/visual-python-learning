@@ -693,7 +693,7 @@ export default function LandingPage() {
               Ready to See Code Differently?
             </h2>
             <p style={{ fontSize: "18px", color: "rgba(255,255,255,0.9)", marginBottom: "40px", lineHeight: "1.7" }}>
-              Join thousands of learners who are mastering Python by understanding how computers really work. 
+              Master Python by understanding how computers really work. Start your journey today - completely free. 
               Start your journey today - it's completely free.
             </p>
             <div style={{ display: "flex", gap: "16px", justifyContent: "center" }}>
@@ -803,10 +803,10 @@ export default function LandingPage() {
             alignItems: "center",
           }}>
             <p style={{ fontSize: "13px", color: "#64748b" }}>
-              © 2025 Visual Python Learning. All rights reserved.
+              © 2025 Hadi Yaqoobi. All rights reserved.
             </p>
             <p style={{ fontSize: "13px", color: "#64748b" }}>
-              Made with ❤️ for learners everywhere
+              
             </p>
           </div>
         </div>
