@@ -285,7 +285,7 @@ export default function HardwarePage() {
                     return (
                       <Link 
                         key={lesson.id}
-                        href={`/hardware/lesson/${lesson.id}`}
+                        href={`/hardware/${lesson.id.toLowerCase()}`}
                         style={{ textDecoration: "none" }}
                       >
                         <motion.div

@@ -57,6 +57,11 @@ const LogicGates3D = dynamic(
   { ssr: false, loading: () => <LoadingPlaceholder text="Loading Logic Gates 3D..." /> }
 );
 
+const BinaryCalculator3D = dynamic(
+  () => import("@/components/hardware/digital3d/BinaryCalculator3D").then(mod => mod.BinaryCalculator3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Binary Calculator 3D..." /> }
+);
+
 const ALUChamber3D = dynamic(
   () => import("@/components/hardware/digital3d/ALUChamber3D").then(mod => mod.ALUChamber3D),
   { ssr: false, loading: () => <LoadingPlaceholder text="Loading ALU Chamber 3D..." /> }
@@ -124,11 +129,12 @@ const LESSONS: Record<string, {
   },
   h3: {
     id: "H3",
-    title: "Animated Adder",
+    title: "Binary Calculator 3D",
     module: "Digital Foundations",
     moduleColor: "#3b82f6",
-    description: "Watch binary addition with carry propagation",
-    component: AnimatedAdder,
+    description: "Watch binary addition with carry propagation in 3D",
+    component: BinaryCalculator3D,
+    is3D: true,
     prev: "h2",
     next: "h4",
   },
