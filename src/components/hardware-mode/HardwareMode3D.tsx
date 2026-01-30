@@ -201,7 +201,7 @@ function ElectronFlowPath({
   particleCount?: number;
 }) {
   const pointsRef = useRef<THREE.Points>(null);
-  const lineRef = useRef<THREE.Line>(null);
+  
   const particleData = useRef<{ t: number; speed: number }[]>([]);
   
   // Generate curve points for the path line

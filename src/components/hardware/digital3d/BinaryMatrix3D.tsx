@@ -8,7 +8,7 @@ import {
   Environment,
   Float,
   MeshTransmissionMaterial,
-  Sparkles
+  Sparkles, Line
 } from '@react-three/drei';
 import { EffectComposer, Bloom, ChromaticAberration } from '@react-three/postprocessing';
 import * as THREE from 'three';
