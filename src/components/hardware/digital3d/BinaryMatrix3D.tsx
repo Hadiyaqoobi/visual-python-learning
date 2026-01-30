@@ -228,39 +228,22 @@ function BitCube({
 
 // Energy connections between active bits
 function EnergyConnections({ bits }: { bits: boolean[] }) {
-  const lineRef = useRef<THREE.Line>(null);
-  
-  useFrame(({ clock }) => {
-    if (!lineRef.current) return;
-    const material = lineRef.current.material as THREE.LineBasicMaterial;
-    material.opacity = 0.3 + Math.sin(clock.elapsedTime * 4) * 0.2;
-  });
-
   const activeBits = bits.map((b, i) => b ? i : -1).filter(i => i >= 0);
   if (activeBits.length < 2) return null;
 
-  const points: THREE.Vector3[] = [];
+  const points: [number, number, number][] = [];
   activeBits.forEach(i => {
-    points.push(new THREE.Vector3(i * 2 - 7, 0, 0));
+    points.push([i * 2 - 7, 0, 0]);
   });
 
   return (
-    <line ref={lineRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={points.length}
-          array={new Float32Array(points.flatMap(p => [p.x, p.y, p.z]))}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <lineBasicMaterial 
-        color="#00FFFF" 
-        transparent 
-        opacity={0.5}
-        blending={THREE.AdditiveBlending}
-      />
-    </line>
+    <Line 
+      points={points}
+      color="#00FFFF"
+      lineWidth={2}
+      transparent
+      opacity={0.5}
+    />
   );
 }
 
