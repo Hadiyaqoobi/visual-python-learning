@@ -57,6 +57,11 @@ const LogicGates3D = dynamic(
   { ssr: false, loading: () => <LoadingPlaceholder text="Loading Logic Gates 3D..." /> }
 );
 
+const RegisterFile3D = dynamic(
+  () => import("@/components/hardware/digital3d/RegisterFile3D").then(mod => mod.RegisterFile3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Register File 3D..." /> }
+);
+
 const BinaryCalculator3D = dynamic(
   () => import("@/components/hardware/digital3d/BinaryCalculator3D").then(mod => mod.BinaryCalculator3D),
   { ssr: false, loading: () => <LoadingPlaceholder text="Loading Binary Calculator 3D..." /> }
@@ -151,11 +156,12 @@ const LESSONS: Record<string, {
   },
   h5: {
     id: "H5",
-    title: "Register File Explorer",
+    title: "Register File 3D",
     module: "Digital Foundations",
     moduleColor: "#3b82f6",
     description: "CPU registers - the fastest storage in your computer",
-    component: RegisterFile,
+    component: RegisterFile3D,
+    is3D: true,
     prev: "h4",
     next: "h6",
   },
