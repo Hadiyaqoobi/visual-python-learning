@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { BookOpen, Code, Trophy, ArrowRight, Zap, Clock, Target, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
+import { VIPWelcomeModal } from "@/components/ui/VIPWelcomeModal";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -48,6 +49,9 @@ export default function DashboardPage() {
       background: "linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)",
       padding: "32px",
     }}>
+      {/* VIP Welcome Modal - Only shows for Sahar on first login */}
+      {user?.email && <VIPWelcomeModal userEmail={user.email} />}
+
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         {/* Welcome Header */}
         <motion.div
@@ -55,7 +59,7 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           style={{ marginBottom: "32px" }}
         >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
             <div>
               <h1 style={{ 
                 fontSize: "32px", 
@@ -66,7 +70,7 @@ export default function DashboardPage() {
                 alignItems: "center",
                 gap: "12px",
               }}>
-                Welcome back{user?.name ? `, ${user.name}` : ""}! 
+                Welcome back{user?.username ? `, ${user.username}` : ""}! 
                 <span style={{ fontSize: "32px" }}>👋</span>
               </h1>
               <p style={{ fontSize: "16px", color: "#64748b" }}>
@@ -80,10 +84,9 @@ export default function DashboardPage() {
               padding: "12px 20px",
               background: "white",
               borderRadius: "12px",
-              border: "1px solid #e2e8f0",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
             }}>
-              <Clock style={{ width: "18px", height: "18px", color: "#64748b" }} />
+              <Clock style={{ width: "18px", height: "18px", color: "#6366f1" }} />
               <span style={{ fontSize: "14px", color: "#64748b" }}>
                 {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
               </span>
@@ -91,54 +94,48 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* Stats Cards */}
+        {/* Stats Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
             gap: "20px",
             marginBottom: "32px",
           }}
         >
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={index}
-                whileHover={{ y: -4, boxShadow: "0 12px 24px rgba(0,0,0,0.08)" }}
-                style={{
-                  background: "white",
-                  borderRadius: "16px",
-                  padding: "24px",
-                  border: "1px solid #e2e8f0",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-                  <div style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "12px",
-                    background: `${stat.color}15`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}>
-                    <Icon style={{ width: "22px", height: "22px", color: stat.color }} />
-                  </div>
-                </div>
-                <div style={{ fontSize: "32px", fontWeight: "800", color: "#1e293b", marginBottom: "4px" }}>
-                  {stat.value}
-                </div>
-                <div style={{ fontSize: "13px", color: "#64748b", fontWeight: "500" }}>
-                  {stat.label}
-                </div>
-              </motion.div>
-            );
-          })}
+          {stats.map((stat, i) => (
+            <div
+              key={i}
+              style={{
+                background: "white",
+                borderRadius: "16px",
+                padding: "24px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+              }}
+            >
+              <div style={{
+                width: "48px",
+                height: "48px",
+                borderRadius: "12px",
+                background: `${stat.color}15`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}>
+                <stat.icon style={{ width: "24px", height: "24px", color: stat.color }} />
+              </div>
+              <div>
+                <div style={{ fontSize: "28px", fontWeight: "700", color: "#1e293b" }}>{stat.value}</div>
+                <div style={{ fontSize: "13px", color: "#64748b" }}>{stat.label}</div>
+              </div>
+            </div>
+          ))}
         </motion.div>
 
         {/* Quick Actions */}
@@ -147,176 +144,107 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 style={{ 
-            fontSize: "20px", 
-            fontWeight: "700", 
-            color: "#1e293b", 
-            marginBottom: "20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}>
-            <Zap style={{ width: "20px", height: "20px", color: "#f59e0b" }} />
+          <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>
             Quick Actions
           </h2>
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: "20px",
           }}>
-            {quickActions.map((action, index) => {
-              const Icon = action.icon;
-              return (
-                <Link key={index} href={action.href} style={{ textDecoration: "none" }}>
-                  <motion.div
-                    whileHover={{ 
-                      y: -6, 
-                      boxShadow: `0 20px 40px ${action.shadowColor}`,
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{
-                      background: action.gradient,
-                      borderRadius: "20px",
-                      padding: "28px",
-                      color: "white",
-                      cursor: "pointer",
-                      position: "relative",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {/* Background decoration */}
-                    <div style={{
-                      position: "absolute",
-                      top: "-20%",
-                      right: "-10%",
-                      width: "150px",
-                      height: "150px",
-                      background: "rgba(255,255,255,0.1)",
-                      borderRadius: "50%",
-                    }} />
-                    
-                    <Icon style={{ width: "36px", height: "36px", marginBottom: "20px" }} />
-                    <h3 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "8px" }}>
-                      {action.title}
-                    </h3>
-                    <p style={{ fontSize: "14px", opacity: 0.9, marginBottom: "20px" }}>
-                      {action.description}
-                    </p>
-                    <div style={{ 
-                      display: "flex", 
-                      alignItems: "center", 
-                      gap: "8px", 
-                      fontSize: "14px", 
-                      fontWeight: "600" 
-                    }}>
-                      Get Started <ArrowRight style={{ width: "16px", height: "16px" }} />
-                    </div>
-                  </motion.div>
-                </Link>
-              );
-            })}
+            {quickActions.map((action, i) => (
+              <Link key={i} href={action.href} style={{ textDecoration: "none" }}>
+                <motion.div
+                  whileHover={{ y: -4, boxShadow: `0 20px 40px ${action.shadowColor}` }}
+                  style={{
+                    background: "white",
+                    borderRadius: "20px",
+                    padding: "28px",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  <div style={{
+                    width: "56px",
+                    height: "56px",
+                    borderRadius: "16px",
+                    background: action.gradient,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: "16px",
+                    boxShadow: `0 8px 20px ${action.shadowColor}`,
+                  }}>
+                    <action.icon style={{ width: "28px", height: "28px", color: "white" }} />
+                  </div>
+                  <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>
+                    {action.title}
+                  </h3>
+                  <p style={{ fontSize: "14px", color: "#64748b", marginBottom: "12px" }}>
+                    {action.description}
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#6366f1", fontWeight: "600", fontSize: "14px" }}>
+                    Get Started <ArrowRight style={{ width: "16px", height: "16px" }} />
+                  </div>
+                </motion.div>
+              </Link>
+            ))}
           </div>
         </motion.div>
 
-        {/* Recent Activity / Continue Section */}
+        {/* Recent Activity Placeholder */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           style={{ marginTop: "32px" }}
         >
-          <h2 style={{ 
-            fontSize: "20px", 
-            fontWeight: "700", 
-            color: "#1e293b", 
-            marginBottom: "20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}>
-            <BookOpen style={{ width: "20px", height: "20px", color: "#6366f1" }} />
+          <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>
             Continue Where You Left Off
           </h2>
           <div style={{
             background: "white",
             borderRadius: "20px",
-            padding: "28px",
-            border: "1px solid #e2e8f0",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            padding: "40px",
+            textAlign: "center",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <div style={{
-                width: "64px",
-                height: "64px",
-                borderRadius: "16px",
-                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: "24px",
-                fontWeight: "800",
-              }}>
-                1
-              </div>
-              <div>
-                <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", marginBottom: "4px" }}>
-                  Chapter 1: Getting Started
-                </h3>
-                <p style={{ fontSize: "14px", color: "#64748b" }}>
-                  5 lessons • Introduction to computation and Python basics
-                </p>
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginTop: "12px",
-                }}>
-                  <div style={{
-                    flex: 1,
-                    maxWidth: "200px",
-                    height: "8px",
-                    background: "#e2e8f0",
-                    borderRadius: "10px",
-                    overflow: "hidden",
-                  }}>
-                    <div style={{
-                      width: "0%",
-                      height: "100%",
-                      background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                      borderRadius: "10px",
-                    }} />
-                  </div>
-                  <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>
-                    0% complete
-                  </span>
-                </div>
-              </div>
+            <div style={{
+              width: "64px",
+              height: "64px",
+              borderRadius: "16px",
+              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px",
+            }}>
+              <BookOpen style={{ width: "32px", height: "32px", color: "white" }} />
             </div>
+            <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", marginBottom: "8px" }}>
+              Start Your First Lesson
+            </h3>
+            <p style={{ fontSize: "14px", color: "#64748b", marginBottom: "20px" }}>
+              Begin with Chapter 1 and learn the fundamentals of Python programming
+            </p>
             <Link href="/learn" style={{ textDecoration: "none" }}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "14px 24px",
-                  borderRadius: "12px",
-                  border: "none",
-                  background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                  color: "white",
-                  fontSize: "14px",
+                  padding: "14px 32px",
+                  fontSize: "15px",
                   fontWeight: "600",
+                  color: "white",
+                  background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                  border: "none",
+                  borderRadius: "12px",
                   cursor: "pointer",
-                  boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)",
+                  boxShadow: "0 8px 20px rgba(99, 102, 241, 0.3)",
                 }}
               >
-                Continue
-                <ArrowRight style={{ width: "16px", height: "16px" }} />
+                Browse Chapters
               </motion.button>
             </Link>
           </div>
