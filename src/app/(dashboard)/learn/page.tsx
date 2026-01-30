@@ -1,198 +1,560 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { chapters } from "@/data/chapters";
-import {
-  BookOpen,
-  Clock,
-  ChevronRight,
-  Search,
-  Filter,
-  Cpu,
-  Code,
-  Zap,
-} from "lucide-react";
 import Link from "next/link";
+import { 
+  BookOpen, 
+  Clock, 
+  ChevronRight, 
+  ChevronDown,
+  GraduationCap, 
+  Target,
+  Sparkles,
+  Trophy,
+  Zap,
+  CheckCircle,
+  Lock
+} from "lucide-react";
+import { Spinner } from "@/components/ui";
+
+interface Lesson {
+  id: string;
+  number: number;
+  title: string;
+  slug: string;
+  estimatedTime: number;
+  difficulty: string;
+}
+
+interface Section {
+  id: string;
+  number: number;
+  title: string;
+  lessons: Lesson[];
+}
+
+interface Chapter {
+  id: string;
+  number: number;
+  title: string;
+  description: string;
+  objectives: string[];
+  sections: Section[];
+  totalLessons: number;
+  completedLessons: number;
+  progressPercent: number;
+}
 
 export default function LearnPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPart, setSelectedPart] = useState<number | null>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
 
-  // Group chapters by part
-  const parts = chapters.reduce((acc, chapter) => {
-    if (!acc[chapter.part]) {
-      acc[chapter.part] = {
-        name: chapter.partName,
-        chapters: [],
-      };
+  useEffect(() => {
+    async function fetchChapters() {
+      try {
+        const res = await fetch("/api/curriculum/chapters");
+        const data = await res.json();
+        setChapters(data);
+        if (data.length > 0) {
+          setExpandedChapter(data[0].id);
+        }
+      } catch (error) {
+        console.error("Failed to fetch chapters:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-    acc[chapter.part].chapters.push(chapter);
-    return acc;
-  }, {} as Record<number, { name: string; chapters: typeof chapters }>);
+    fetchChapters();
+  }, []);
 
-  // Filter chapters
-  const filteredChapters = chapters.filter((chapter) => {
-    const matchesSearch =
-      searchQuery === "" ||
-      chapter.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chapter.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesPart = selectedPart === null || chapter.part === selectedPart;
-    return matchesSearch && matchesPart;
-  });
+  if (isLoading) {
+    return (
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        background: "linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)",
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <Spinner size="lg" />
+          <p style={{ marginTop: "16px", color: "#64748b" }}>Loading curriculum...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] text-white p-8">
-      {/* Header */}
-      <div className="max-w-6xl mx-auto mb-8">
-        <h1 className="text-3xl font-bold mb-2">Learn Python + Hardware</h1>
-        <p className="text-gray-400">
-          Master Python programming while understanding how code runs on real hardware
-        </p>
-      </div>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)" }}>
+      {/* Hero Header */}
+      <div style={{
+        background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)",
+        padding: "50px 20px",
+        color: "white",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* Background decoration */}
+        <div style={{
+          position: "absolute",
+          top: "-50%",
+          right: "-10%",
+          width: "400px",
+          height: "400px",
+          background: "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
+          borderRadius: "50%",
+        }} />
+        <div style={{
+          position: "absolute",
+          bottom: "-30%",
+          left: "-5%",
+          width: "300px",
+          height: "300px",
+          background: "radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)",
+          borderRadius: "50%",
+        }} />
 
-      {/* Search and Filter */}
-      <div className="max-w-6xl mx-auto mb-8 flex gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
-          <input
-            type="text"
-            placeholder="Search chapters..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-gray-800/50 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500"
-          />
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setSelectedPart(null)}
-            className={`px-4 py-2 rounded-lg text-sm transition-all ${
-              selectedPart === null
-                ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                : "bg-gray-800/50 text-gray-400 hover:text-white"
-            }`}
+        <div style={{ maxWidth: "900px", margin: "0 auto", position: "relative" }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
           >
-            All
-          </button>
-          {Object.entries(parts).map(([partNum, part]) => (
-            <button
-              key={partNum}
-              onClick={() => setSelectedPart(parseInt(partNum))}
-              className={`px-4 py-2 rounded-lg text-sm transition-all ${
-                selectedPart === parseInt(partNum)
-                  ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                  : "bg-gray-800/50 text-gray-400 hover:text-white"
-              }`}
-            >
-              Part {partNum}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Chapters Grid */}
-      <div className="max-w-6xl mx-auto">
-        {Object.entries(parts).map(([partNum, part]) => {
-          const partChapters = filteredChapters.filter(
-            (c) => c.part === parseInt(partNum)
-          );
-          if (partChapters.length === 0) return null;
-
-          return (
-            <div key={partNum} className="mb-12">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-3">
-                <span className="text-cyan-400">Part {partNum}:</span>
-                <span>{part.name}</span>
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {partChapters.map((chapter, index) => (
-                  <motion.div
-                    key={chapter.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Link href={`/learn/chapter/${chapter.id}`}>
-                      <div
-                        className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-5 hover:border-cyan-500/50 hover:bg-gray-800/50 transition-all cursor-pointer group"
-                        style={{
-                          borderLeftColor: chapter.color,
-                          borderLeftWidth: "3px",
-                        }}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{chapter.icon}</span>
-                            <div>
-                              <div className="text-xs text-gray-500 mb-1">
-                                Chapter {chapter.id}
-                              </div>
-                              <h3 className="font-semibold group-hover:text-cyan-400 transition-colors">
-                                {chapter.title}
-                              </h3>
-                            </div>
-                          </div>
-                          <ChevronRight
-                            size={20}
-                            className="text-gray-600 group-hover:text-cyan-400 transition-colors"
-                          />
-                        </div>
-                        <p className="text-sm text-gray-400 mb-4 line-clamp-2">
-                          {chapter.description}
-                        </p>
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <div className="flex items-center gap-4">
-                            <span className="flex items-center gap-1">
-                              <Clock size={12} />
-                              {chapter.duration}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <BookOpen size={12} />
-                              {chapter.concepts.length} concepts
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Code size={12} />
-                              {chapter.exercises.length} exercises
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Hardware indicator */}
-                        {chapter.hardwareConnection && (
-                          <div className="mt-3 pt-3 border-t border-gray-700/50 flex items-center gap-2 text-xs text-orange-400">
-                            <Cpu size={12} />
-                            <span>Hardware visualization included</span>
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                  </motion.div>
-                ))}
+            <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "16px" }}>
+              <div style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "16px",
+                background: "rgba(255,255,255,0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backdropFilter: "blur(10px)",
+              }}>
+                <GraduationCap style={{ width: "32px", height: "32px" }} />
+              </div>
+              <div>
+                <h1 style={{ fontSize: "32px", fontWeight: "800", marginBottom: "4px" }}>
+                  Learn Python
+                </h1>
+                <p style={{ fontSize: "16px", opacity: 0.9 }}>
+                  Your journey to Python mastery starts here
+                </p>
               </div>
             </div>
-          );
-        })}
+            
+            <p style={{ 
+              fontSize: "15px", 
+              opacity: 0.85, 
+              maxWidth: "600px", 
+              lineHeight: "1.7",
+              marginTop: "20px",
+            }}>
+              Follow our structured curriculum based on MIT's "Introduction to Computation 
+              and Programming Using Python". Learn by doing with interactive exercises and 
+              visualize how your code executes.
+            </p>
+
+            {/* Stats */}
+            <div style={{
+              display: "flex",
+              gap: "24px",
+              marginTop: "28px",
+            }}>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 16px",
+                background: "rgba(255,255,255,0.15)",
+                borderRadius: "10px",
+                backdropFilter: "blur(10px)",
+              }}>
+                <BookOpen style={{ width: "18px", height: "18px" }} />
+                <span style={{ fontSize: "14px", fontWeight: "600" }}>
+                  {chapters.reduce((acc, ch) => acc + ch.totalLessons, 0)} Lessons
+                </span>
+              </div>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 16px",
+                background: "rgba(255,255,255,0.15)",
+                borderRadius: "10px",
+                backdropFilter: "blur(10px)",
+              }}>
+                <Target style={{ width: "18px", height: "18px" }} />
+                <span style={{ fontSize: "14px", fontWeight: "600" }}>
+                  {chapters.length} Chapters
+                </span>
+              </div>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 16px",
+                background: "rgba(255,255,255,0.15)",
+                borderRadius: "10px",
+                backdropFilter: "blur(10px)",
+              }}>
+                <Zap style={{ width: "18px", height: "18px" }} />
+                <span style={{ fontSize: "14px", fontWeight: "600" }}>
+                  Interactive
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
 
-      {/* Quick Access to IDE */}
-      <div className="max-w-6xl mx-auto mt-12">
-        <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20 rounded-xl p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold mb-1">Want to experiment freely?</h3>
-              <p className="text-gray-400 text-sm">
-                Open the IDE with hardware visualization to write and test any Python code
-              </p>
-            </div>
-            <Link
-              href="/ide"
-              className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-black px-6 py-3 rounded-lg font-medium transition-colors"
+      {/* Chapters */}
+      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 20px" }}>
+        {chapters.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              textAlign: "center",
+              padding: "60px 20px",
+              background: "white",
+              borderRadius: "20px",
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+            }}
+          >
+            <Sparkles style={{ width: "56px", height: "56px", color: "#6366f1", margin: "0 auto 20px" }} />
+            <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#1e293b", marginBottom: "10px" }}>
+              Content Coming Soon
+            </h2>
+            <p style={{ color: "#64748b", fontSize: "15px" }}>
+              We're preparing amazing lessons for you!
+            </p>
+          </motion.div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            {chapters.map((chapter, index) => (
+              <motion.div
+                key={chapter.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                style={{
+                  background: "white",
+                  borderRadius: "20px",
+                  border: "1px solid #e2e8f0",
+                  overflow: "hidden",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+                }}
+              >
+                {/* Chapter Header */}
+                <motion.button
+                  whileHover={{ backgroundColor: "#fafafa" }}
+                  onClick={() => setExpandedChapter(expandedChapter === chapter.id ? null : chapter.id)}
+                  style={{
+                    width: "100%",
+                    padding: "24px 28px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                    <div style={{
+                      width: "64px",
+                      height: "64px",
+                      borderRadius: "16px",
+                      background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      fontSize: "26px",
+                      fontWeight: "800",
+                      boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)",
+                    }}>
+                      {chapter.number}
+                    </div>
+                    <div>
+                      <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>
+                        Chapter {chapter.number}: {chapter.title}
+                      </h2>
+                      <p style={{ fontSize: "14px", color: "#64748b", maxWidth: "450px", lineHeight: "1.5" }}>
+                        {chapter.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ 
+                        fontSize: "16px", 
+                        fontWeight: "700", 
+                        color: "#1e293b",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        justifyContent: "flex-end",
+                      }}>
+                        <BookOpen style={{ width: "16px", height: "16px", color: "#6366f1" }} />
+                        {chapter.totalLessons} lessons
+                      </div>
+                      <div style={{ 
+                        fontSize: "13px", 
+                        color: chapter.completedLessons > 0 ? "#22c55e" : "#94a3b8",
+                        marginTop: "4px",
+                      }}>
+                        {chapter.completedLessons} / {chapter.totalLessons} complete
+                      </div>
+                    </div>
+                    <motion.div
+                      animate={{ rotate: expandedChapter === chapter.id ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        width: "36px",
+                        height: "36px",
+                        borderRadius: "10px",
+                        background: expandedChapter === chapter.id ? "#6366f1" : "#f1f5f9",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <ChevronDown style={{ 
+                        width: "20px", 
+                        height: "20px", 
+                        color: expandedChapter === chapter.id ? "white" : "#64748b" 
+                      }} />
+                    </motion.div>
+                  </div>
+                </motion.button>
+
+                {/* Chapter Content */}
+                {expandedChapter === chapter.id && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      borderTop: "1px solid #e2e8f0",
+                      background: "linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)",
+                    }}
+                  >
+                    {/* Objectives */}
+                    <div style={{ padding: "20px 28px", borderBottom: "1px solid #e2e8f0" }}>
+                      <h3 style={{ 
+                        fontSize: "12px", 
+                        fontWeight: "700", 
+                        color: "#6366f1", 
+                        marginBottom: "12px", 
+                        letterSpacing: "1px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}>
+                        <Target style={{ width: "14px", height: "14px" }} />
+                        LEARNING OBJECTIVES
+                      </h3>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                        {chapter.objectives.map((obj, i) => (
+                          <motion.span 
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: i * 0.05 }}
+                            style={{
+                              fontSize: "13px",
+                              padding: "8px 14px",
+                              background: "white",
+                              color: "#4f46e5",
+                              borderRadius: "20px",
+                              fontWeight: "500",
+                              border: "1px solid #c7d2fe",
+                              boxShadow: "0 2px 8px rgba(99, 102, 241, 0.08)",
+                            }}
+                          >
+                            ✓ {obj}
+                          </motion.span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Sections and Lessons */}
+                    <div style={{ padding: "20px 28px" }}>
+                      {chapter.sections.map((section, sIndex) => (
+                        <div key={section.id} style={{ marginBottom: sIndex < chapter.sections.length - 1 ? "24px" : 0 }}>
+                          <h3 style={{
+                            fontSize: "15px",
+                            fontWeight: "700",
+                            color: "#1e293b",
+                            marginBottom: "12px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                          }}>
+                            <span style={{
+                              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                              padding: "4px 10px",
+                              borderRadius: "6px",
+                              fontSize: "12px",
+                              color: "white",
+                              fontWeight: "700",
+                            }}>
+                              {section.number}
+                            </span>
+                            {section.title}
+                          </h3>
+
+                          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginLeft: "8px" }}>
+                            {section.lessons.map((lesson, lIndex) => (
+                              <Link
+                                key={lesson.id}
+                                href={`/learn/${lesson.slug}`}
+                                style={{ textDecoration: "none" }}
+                              >
+                                <motion.div
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: (sIndex * 0.1) + (lIndex * 0.05) }}
+                                  whileHover={{ 
+                                    x: 6, 
+                                    boxShadow: "0 6px 20px rgba(99, 102, 241, 0.15)",
+                                    borderColor: "#6366f1",
+                                  }}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    padding: "16px 18px",
+                                    background: "white",
+                                    borderRadius: "12px",
+                                    border: "1px solid #e2e8f0",
+                                    cursor: "pointer",
+                                    transition: "all 0.2s",
+                                  }}
+                                >
+                                  <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                                    <div style={{
+                                      width: "40px",
+                                      height: "40px",
+                                      borderRadius: "10px",
+                                      background: "linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}>
+                                      <BookOpen style={{ width: "18px", height: "18px", color: "#6366f1" }} />
+                                    </div>
+                                    <div>
+                                      <span style={{ fontSize: "15px", fontWeight: "600", color: "#1e293b" }}>
+                                        {lesson.title}
+                                      </span>
+                                      <div style={{ 
+                                        display: "flex", 
+                                        alignItems: "center", 
+                                        gap: "12px", 
+                                        marginTop: "4px" 
+                                      }}>
+                                        <span style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                          fontSize: "12px",
+                                          color: "#64748b",
+                                        }}>
+                                          <Clock style={{ width: "12px", height: "12px" }} />
+                                          {lesson.estimatedTime} min
+                                        </span>
+                                        <span style={{
+                                          fontSize: "11px",
+                                          padding: "2px 8px",
+                                          borderRadius: "10px",
+                                          background: lesson.difficulty === "BEGINNER" ? "#dcfce7" : "#fef3c7",
+                                          color: lesson.difficulty === "BEGINNER" ? "#15803d" : "#a16207",
+                                          fontWeight: "600",
+                                        }}>
+                                          {lesson.difficulty}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                    <ChevronRight style={{ width: "20px", height: "20px", color: "#6366f1" }} />
+                                  </div>
+                                </motion.div>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            ))}
+
+            {/* Coming Soon Chapter */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              style={{
+                background: "white",
+                borderRadius: "20px",
+                border: "2px dashed #cbd5e1",
+                padding: "28px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                opacity: 0.7,
+              }}
             >
-              <Zap size={18} />
-              Open IDE
-            </Link>
+              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <div style={{
+                  width: "64px",
+                  height: "64px",
+                  borderRadius: "16px",
+                  background: "#f1f5f9",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#94a3b8",
+                  fontSize: "26px",
+                  fontWeight: "800",
+                }}>
+                  2
+                </div>
+                <div>
+                  <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#64748b", marginBottom: "6px" }}>
+                    Chapter 2: Core Elements
+                  </h2>
+                  <p style={{ fontSize: "14px", color: "#94a3b8" }}>
+                    Coming soon - Functions, loops, and more!
+                  </p>
+                </div>
+              </div>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 16px",
+                background: "#f1f5f9",
+                borderRadius: "10px",
+                color: "#64748b",
+                fontSize: "13px",
+                fontWeight: "600",
+              }}>
+                <Lock style={{ width: "16px", height: "16px" }} />
+                Coming Soon
+              </div>
+            </motion.div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
