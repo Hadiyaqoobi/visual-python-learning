@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Cpu, Zap, Info, Play, RotateCcw, ArrowRight, Clock } from "lucide-react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Cpu, Zap, Info, Play, RotateCcw } from "lucide-react";
 
 interface Register {
   name: string;
@@ -12,7 +12,7 @@ interface Register {
   purpose: string;
 }
 
-const REGISTERS: Register[] = [
+const INITIAL_REGISTERS: Register[] = [
   { name: "RAX", value: 0, description: "Accumulator", color: "#FF6B6B", purpose: "Math results, return values" },
   { name: "RBX", value: 0, description: "Base", color: "#4ECDC4", purpose: "General purpose, base pointer" },
   { name: "RCX", value: 0, description: "Counter", color: "#45B7D1", purpose: "Loop counters, shifts" },
@@ -29,12 +29,12 @@ const MEMORY_SPEEDS = [
   { name: "L2 Cache", time: "~4 ns", color: "#00AAFF", width: 70 },
   { name: "L3 Cache", time: "~12 ns", color: "#0088FF", width: 55 },
   { name: "RAM", time: "~100 ns", color: "#FF8800", width: 40 },
-  { name: "SSD", time: "~100 μs", color: "#FF4444", width: 25 },
+  { name: "SSD", time: "~100 us", color: "#FF4444", width: 25 },
 ];
 
 export function RegisterFile3D() {
-  const [registers, setRegisters] = useState<Register[]>(REGISTERS);
-  const [selectedReg, setSelectedReg] = useState<string | null>("RAX");
+  const [registers, setRegisters] = useState<Register[]>(INITIAL_REGISTERS);
+  const [selectedReg, setSelectedReg] = useState<string>("RAX");
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationStep, setAnimationStep] = useState(0);
   const [showExplanation, setShowExplanation] = useState(true);
@@ -43,14 +43,14 @@ export function RegisterFile3D() {
   const selectedRegister = registers.find(r => r.name === selectedReg);
 
   const runDemo = () => {
+    if (isAnimating) return;
     setIsAnimating(true);
     setAnimationStep(0);
     
-    // Simulate: x = 5 + 3
     const steps = [
-      { reg: "RAX", value: 5, desc: "MOV RAX, 5  # Load 5 into RAX" },
-      { reg: "RBX", value: 3, desc: "MOV RBX, 3  # Load 3 into RBX" },
-      { reg: "RAX", value: 8, desc: "ADD RAX, RBX  # RAX = RAX + RBX = 8" },
+      { reg: "RAX", value: 5 },
+      { reg: "RBX", value: 3 },
+      { reg: "RAX", value: 8 },
     ];
 
     steps.forEach((step, i) => {
@@ -68,7 +68,7 @@ export function RegisterFile3D() {
   };
 
   const resetRegisters = () => {
-    setRegisters(REGISTERS);
+    setRegisters(INITIAL_REGISTERS);
     setAnimationStep(0);
     setIsAnimating(false);
   };
@@ -87,7 +87,10 @@ export function RegisterFile3D() {
   };
 
   const toHex = (n: number) => "0x" + n.toString(16).toUpperCase().padStart(8, "0");
-  const toBinary = (n: number) => n.toString(2).padStart(32, "0").match(/.{8}/g)?.join(" ") || "";
+  const toBinary = (n: number) => {
+    const bin = n.toString(2).padStart(32, "0");
+    return bin.match(/.{8}/g)?.join(" ") || bin;
+  };
 
   return (
     <div style={{
@@ -96,7 +99,6 @@ export function RegisterFile3D() {
       padding: 24,
       fontFamily: "'JetBrains Mono', monospace",
     }}>
-      {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 24 }}>
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
@@ -118,7 +120,6 @@ export function RegisterFile3D() {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: showExplanation ? "1fr 1fr 320px" : "1fr 1fr", gap: 24 }}>
-        {/* Register Grid */}
         <div style={{
           background: "rgba(0, 20, 40, 0.6)",
           borderRadius: 20,
@@ -147,23 +148,9 @@ export function RegisterFile3D() {
                   borderRadius: 12,
                   padding: 14,
                   cursor: "pointer",
-                  position: "relative",
-                  overflow: "hidden",
+                  boxShadow: selectedReg === reg.name ? `0 0 20px ${reg.color}44` : "none",
                 }}
               >
-                {/* Glow effect when selected */}
-                {selectedReg === reg.name && (
-                  <motion.div
-                    layoutId="registerGlow"
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background: `radial-gradient(circle at center, ${reg.color}22, transparent)`,
-                      pointerEvents: "none",
-                    }}
-                  />
-                )}
-                
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                   <span style={{ 
                     color: reg.color, 
@@ -180,11 +167,7 @@ export function RegisterFile3D() {
                   key={reg.value}
                   initial={{ scale: 1.2, color: "#00FF88" }}
                   animate={{ scale: 1, color: "#fff" }}
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    fontFamily: "monospace",
-                  }}
+                  style={{ fontSize: 13, fontWeight: 600, fontFamily: "monospace" }}
                 >
                   {toHex(reg.value)}
                 </motion.div>
@@ -197,9 +180,7 @@ export function RegisterFile3D() {
           </div>
         </div>
 
-        {/* Selected Register Details + Speed Comparison */}
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* Selected Register Details */}
           <div style={{
             background: "rgba(0, 20, 40, 0.6)",
             borderRadius: 20,
@@ -228,8 +209,8 @@ export function RegisterFile3D() {
                 </div>
                 
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ color: "#666", fontSize: 11, marginBottom: 4 }}>BINARY (32-bit view)</div>
-                  <div style={{ color: "#FF00FF", fontSize: 11, fontFamily: "monospace", wordBreak: "break-all" }}>
+                  <div style={{ color: "#666", fontSize: 11, marginBottom: 4 }}>BINARY (32-bit)</div>
+                  <div style={{ color: "#FF00FF", fontSize: 10, fontFamily: "monospace", wordBreak: "break-all" }}>
                     {toBinary(selectedRegister.value)}
                   </div>
                 </div>
@@ -272,7 +253,6 @@ export function RegisterFile3D() {
             )}
           </div>
 
-          {/* Speed Comparison */}
           <div style={{
             background: "rgba(0, 20, 40, 0.6)",
             borderRadius: 20,
@@ -285,32 +265,27 @@ export function RegisterFile3D() {
             </h3>
             
             {MEMORY_SPEEDS.map((mem, i) => (
-              <div key={mem.name} style={{ marginBottom: 12 }}>
+              <div key={mem.name} style={{ marginBottom: 10 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ color: mem.color, fontSize: 12, fontWeight: 600 }}>{mem.name}</span>
-                  <span style={{ color: "#888", fontSize: 11 }}>{mem.time}</span>
+                  <span style={{ color: mem.color, fontSize: 11, fontWeight: 600 }}>{mem.name}</span>
+                  <span style={{ color: "#888", fontSize: 10 }}>{mem.time}</span>
                 </div>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${mem.width}%` }}
                   transition={{ delay: i * 0.1, duration: 0.5 }}
                   style={{
-                    height: 8,
+                    height: 6,
                     background: `linear-gradient(90deg, ${mem.color}, ${mem.color}88)`,
-                    borderRadius: 4,
-                    boxShadow: `0 0 10px ${mem.color}44`,
+                    borderRadius: 3,
+                    boxShadow: `0 0 8px ${mem.color}44`,
                   }}
                 />
               </div>
             ))}
-            
-            <p style={{ color: "#666", fontSize: 10, marginTop: 12, lineHeight: 1.5 }}>
-              Registers are ~100x faster than RAM! This is why CPUs have registers for frequently used data.
-            </p>
           </div>
         </div>
 
-        {/* Explanation Panel */}
         {showExplanation && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -328,18 +303,15 @@ export function RegisterFile3D() {
               WHAT ARE REGISTERS?
             </h3>
             
-            <div style={{ marginBottom: 16 }}>
-              <p style={{ color: "#aaa", fontSize: 12, lineHeight: 1.6 }}>
-                Registers are <strong style={{ color: "#00FF88" }}>tiny, ultra-fast storage locations</strong> built directly into the CPU. 
-                A modern CPU has only about <strong style={{ color: "#FF00FF" }}>16 general-purpose registers</strong>, each holding 64 bits (8 bytes).
-              </p>
-            </div>
+            <p style={{ color: "#aaa", fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>
+              Registers are <strong style={{ color: "#00FF88" }}>tiny, ultra-fast storage</strong> built into the CPU. 
+              A modern CPU has only <strong style={{ color: "#FF00FF" }}>16 general-purpose registers</strong>, each holding 64 bits.
+            </p>
 
             <div style={{ marginBottom: 16 }}>
               <h4 style={{ color: "#FF8800", fontSize: 13, marginBottom: 8 }}>Why So Few?</h4>
               <p style={{ color: "#aaa", fontSize: 12, lineHeight: 1.6 }}>
-                Speed costs space! Registers use expensive, power-hungry circuits. 
-                More registers = slower access + more heat.
+                Speed costs space! Registers use expensive circuits. More registers = slower access + more heat.
               </p>
             </div>
 
@@ -353,11 +325,10 @@ export function RegisterFile3D() {
               <h4 style={{ color: "#00FF88", fontSize: 12, marginBottom: 6 }}>Python Connection</h4>
               <p style={{ color: "#ccc", fontSize: 11, lineHeight: 1.5 }}>
                 When you write <code style={{ background: "#1a1a3e", padding: "2px 6px", borderRadius: 4, color: "#00FFFF" }}>x = 5 + 3</code>, 
-                Python compiles this to CPU instructions that load values into registers, perform the addition in the ALU, and store the result.
+                the CPU loads values into registers, adds them in the ALU, and stores the result.
               </p>
             </div>
 
-            {/* Demo Button */}
             <div style={{ display: "flex", gap: 8 }}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -401,7 +372,6 @@ export function RegisterFile3D() {
               </motion.button>
             </div>
 
-            {/* Animation Steps */}
             {animationStep > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -418,7 +388,7 @@ export function RegisterFile3D() {
                 <div style={{ fontSize: 11, fontFamily: "monospace" }}>
                   {animationStep >= 1 && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: "#FF6B6B", marginBottom: 4 }}>
-                      MOV RAX, 5  <span style={{ color: "#666" }}># Load 5</span>
+                      MOV RAX, 5  <span style={{ color: "#666 "}}># Load 5</span>
                     </motion.div>
                   )}
                   {animationStep >= 2 && (
@@ -438,7 +408,6 @@ export function RegisterFile3D() {
         )}
       </div>
 
-      {/* Toggle Explanation Button */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
         <motion.button
           whileHover={{ scale: 1.05 }}
