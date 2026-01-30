@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { 
   Play, 
@@ -10,19 +11,30 @@ import {
   Code, 
   Eye,
   ChevronRight,
-  CheckCircle,
   Sparkles,
   GraduationCap,
   ArrowRight,
-  Monitor,
   Database,
-  GitBranch,
-  Star
+  Menu,
+  X
 } from "lucide-react";
 
 export default function LandingPage() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Close menu when clicking a link
+  const handleNavClick = () => setIsMobileMenuOpen(false);
+
   return (
-    <div style={{ minHeight: "100vh", background: "#ffffff" }}>
+    <div style={{ minHeight: "100vh", background: "#ffffff", overflowX: "hidden" }}>
       {/* Navigation */}
       <nav style={{
         position: "fixed",
@@ -30,106 +42,224 @@ export default function LandingPage() {
         left: 0,
         right: 0,
         zIndex: 1000,
-        background: "rgba(255, 255, 255, 0.9)",
+        background: "rgba(255, 255, 255, 0.95)",
         backdropFilter: "blur(20px)",
         borderBottom: "1px solid rgba(0,0,0,0.05)",
       }}>
         <div style={{
           maxWidth: "1200px",
           margin: "0 auto",
-          padding: "16px 24px",
+          padding: isMobile ? "12px 16px" : "16px 24px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
         }}>
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px" }}>
             <div style={{
-              width: "40px",
-              height: "40px",
+              width: isMobile ? "36px" : "40px",
+              height: isMobile ? "36px" : "40px",
               borderRadius: "12px",
               background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "20px",
+              fontSize: isMobile ? "18px" : "20px",
             }}>
               🐍
             </div>
-            <span style={{ fontSize: "20px", fontWeight: "700", color: "#1e293b" }}>
+            <span style={{ fontSize: isMobile ? "18px" : "20px", fontWeight: "700", color: "#1e293b" }}>
               Visual Python
             </span>
           </Link>
           
-          <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
-            <Link href="#features" style={{ textDecoration: "none", color: "#64748b", fontSize: "14px", fontWeight: "500" }}>
-              Features
-            </Link>
-            <Link href="#how-it-works" style={{ textDecoration: "none", color: "#64748b", fontSize: "14px", fontWeight: "500" }}>
-              How It Works
-            </Link>
-            <Link href="#curriculum" style={{ textDecoration: "none", color: "#64748b", fontSize: "14px", fontWeight: "500" }}>
-              Curriculum
-            </Link>
-            <Link href="/login" style={{ textDecoration: "none", color: "#64748b", fontSize: "14px", fontWeight: "500" }}>
-              Sign In
-            </Link>
-            <Link href="/register" style={{ textDecoration: "none" }}>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                  color: "white",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                }}
-              >
-                Get Started Free
-              </motion.button>
-            </Link>
-          </div>
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
+              <Link href="#features" style={{ textDecoration: "none", color: "#64748b", fontSize: "14px", fontWeight: "500" }}>
+                Features
+              </Link>
+              <Link href="#how-it-works" style={{ textDecoration: "none", color: "#64748b", fontSize: "14px", fontWeight: "500" }}>
+                How It Works
+              </Link>
+              <Link href="#curriculum" style={{ textDecoration: "none", color: "#64748b", fontSize: "14px", fontWeight: "500" }}>
+                Curriculum
+              </Link>
+              <Link href="/login" style={{ textDecoration: "none", color: "#64748b", fontSize: "14px", fontWeight: "500" }}>
+                Sign In
+              </Link>
+              <Link href="/register" style={{ textDecoration: "none" }}>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    padding: "10px 20px",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                >
+                  Get Started Free
+                </motion.button>
+              </Link>
+            </div>
+          )}
+
+          {/* Mobile Hamburger Button */}
+          {isMobile && (
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: "8px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {isMobileMenuOpen ? (
+                <X style={{ width: "24px", height: "24px", color: "#1e293b" }} />
+              ) : (
+                <Menu style={{ width: "24px", height: "24px", color: "#1e293b" }} />
+              )}
+            </button>
+          )}
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        <AnimatePresence>
+          {isMobile && isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{
+                background: "white",
+                borderTop: "1px solid #e2e8f0",
+                overflow: "hidden",
+              }}
+            >
+              <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <Link href="#features" onClick={handleNavClick} style={{
+                  textDecoration: "none",
+                  color: "#1e293b",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  padding: "12px 16px",
+                  borderRadius: "10px",
+                  background: "#f8fafc",
+                }}>
+                  Features
+                </Link>
+                <Link href="#how-it-works" onClick={handleNavClick} style={{
+                  textDecoration: "none",
+                  color: "#1e293b",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  padding: "12px 16px",
+                  borderRadius: "10px",
+                  background: "#f8fafc",
+                }}>
+                  How It Works
+                </Link>
+                <Link href="#curriculum" onClick={handleNavClick} style={{
+                  textDecoration: "none",
+                  color: "#1e293b",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  padding: "12px 16px",
+                  borderRadius: "10px",
+                  background: "#f8fafc",
+                }}>
+                  Curriculum
+                </Link>
+                <Link href="/login" onClick={handleNavClick} style={{
+                  textDecoration: "none",
+                  color: "#1e293b",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  padding: "12px 16px",
+                  borderRadius: "10px",
+                  background: "#f8fafc",
+                }}>
+                  Sign In
+                </Link>
+                <Link href="/register" onClick={handleNavClick} style={{ textDecoration: "none", marginTop: "8px" }}>
+                  <button style={{
+                    width: "100%",
+                    padding: "14px 20px",
+                    borderRadius: "12px",
+                    border: "none",
+                    background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                    color: "white",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}>
+                    Get Started Free
+                  </button>
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Section */}
       <section style={{
-        paddingTop: "140px",
-        paddingBottom: "100px",
+        paddingTop: isMobile ? "100px" : "140px",
+        paddingBottom: isMobile ? "60px" : "100px",
         background: "linear-gradient(180deg, #f8fafc 0%, #eef2ff 50%, #ffffff 100%)",
         position: "relative",
         overflow: "hidden",
       }}>
-        {/* Background decorations */}
-        <div style={{
-          position: "absolute",
-          top: "10%",
-          right: "5%",
-          width: "400px",
-          height: "400px",
-          background: "radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%)",
-          borderRadius: "50%",
-        }} />
-        <div style={{
-          position: "absolute",
-          bottom: "10%",
-          left: "5%",
-          width: "300px",
-          height: "300px",
-          background: "radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)",
-          borderRadius: "50%",
-        }} />
+        {/* Background decorations - hidden on mobile */}
+        {!isMobile && (
+          <>
+            <div style={{
+              position: "absolute",
+              top: "10%",
+              right: "5%",
+              width: "400px",
+              height: "400px",
+              background: "radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%)",
+              borderRadius: "50%",
+            }} />
+            <div style={{
+              position: "absolute",
+              bottom: "10%",
+              left: "5%",
+              width: "300px",
+              height: "300px",
+              background: "radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)",
+              borderRadius: "50%",
+            }} />
+          </>
+        )}
 
-        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", position: "relative" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
+        <div style={{ 
+          maxWidth: "1200px", 
+          margin: "0 auto", 
+          padding: isMobile ? "0 20px" : "0 24px", 
+          position: "relative" 
+        }}>
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", 
+            gap: isMobile ? "40px" : "60px", 
+            alignItems: "center" 
+          }}>
             {/* Left side - Text */}
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
+              style={{ textAlign: isMobile ? "center" : "left" }}
             >
               <div style={{
                 display: "inline-flex",
@@ -138,7 +268,7 @@ export default function LandingPage() {
                 padding: "8px 16px",
                 background: "linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)",
                 borderRadius: "30px",
-                marginBottom: "24px",
+                marginBottom: "20px",
                 border: "1px solid #c7d2fe",
               }}>
                 <Sparkles style={{ width: "16px", height: "16px", color: "#6366f1" }} />
@@ -148,11 +278,11 @@ export default function LandingPage() {
               </div>
 
               <h1 style={{
-                fontSize: "56px",
+                fontSize: isMobile ? "36px" : "56px",
                 fontWeight: "800",
                 color: "#0f172a",
                 lineHeight: "1.1",
-                marginBottom: "24px",
+                marginBottom: "20px",
               }}>
                 Master Python by
                 <span style={{
@@ -166,26 +296,36 @@ export default function LandingPage() {
               </h1>
 
               <p style={{
-                fontSize: "18px",
+                fontSize: isMobile ? "16px" : "18px",
                 color: "#475569",
                 lineHeight: "1.7",
-                marginBottom: "36px",
-                maxWidth: "500px",
+                marginBottom: "32px",
+                maxWidth: isMobile ? "100%" : "500px",
+                margin: isMobile ? "0 auto 32px" : "0 0 32px 0",
               }}>
                 Watch your code flow through CPU and memory with beautiful animations. 
                 Understand how computers really work while learning to code.
               </p>
 
-              <div style={{ display: "flex", gap: "16px", marginBottom: "48px" }}>
+              <div style={{ 
+                display: "flex", 
+                gap: "12px", 
+                marginBottom: "40px",
+                flexDirection: isMobile ? "column" : "row",
+                alignItems: isMobile ? "stretch" : "center",
+                justifyContent: isMobile ? "center" : "flex-start",
+              }}>
                 <Link href="/register" style={{ textDecoration: "none" }}>
                   <motion.button
-                    whileHover={{ scale: 1.02, boxShadow: "0 8px 30px rgba(99, 102, 241, 0.3)" }}
+                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     style={{
                       display: "flex",
                       alignItems: "center",
+                      justifyContent: "center",
                       gap: "10px",
-                      padding: "16px 32px",
+                      padding: isMobile ? "16px 24px" : "16px 32px",
+                      width: isMobile ? "100%" : "auto",
                       borderRadius: "14px",
                       border: "none",
                       background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
@@ -207,8 +347,10 @@ export default function LandingPage() {
                     style={{
                       display: "flex",
                       alignItems: "center",
+                      justifyContent: "center",
                       gap: "10px",
-                      padding: "16px 32px",
+                      padding: isMobile ? "16px 24px" : "16px 32px",
+                      width: isMobile ? "100%" : "auto",
                       borderRadius: "14px",
                       border: "2px solid #e2e8f0",
                       background: "white",
@@ -225,47 +367,58 @@ export default function LandingPage() {
               </div>
 
               {/* Stats */}
-              <div style={{ display: "flex", gap: "40px" }}>
-                <div>
-                  <div style={{ fontSize: "32px", fontWeight: "800", color: "#6366f1" }}>5+</div>
-                  <div style={{ fontSize: "14px", color: "#64748b" }}>Interactive Lessons</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: "32px", fontWeight: "800", color: "#8b5cf6" }}>13+</div>
-                  <div style={{ fontSize: "14px", color: "#64748b" }}>Coding Exercises</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: "32px", fontWeight: "800", color: "#a855f7" }}>100%</div>
-                  <div style={{ fontSize: "14px", color: "#64748b" }}>Free to Start</div>
-                </div>
+              <div style={{ 
+                display: "flex", 
+                gap: isMobile ? "24px" : "40px",
+                justifyContent: isMobile ? "center" : "flex-start",
+                flexWrap: "wrap",
+              }}>
+                {[
+                  { value: "310+", label: "Lessons" },
+                  { value: "309+", label: "Exercises" },
+                  { value: "100%", label: "Free" },
+                ].map((stat, i) => (
+                  <div key={i} style={{ textAlign: "center" }}>
+                    <div style={{ 
+                      fontSize: isMobile ? "24px" : "32px", 
+                      fontWeight: "800", 
+                      color: "#6366f1" 
+                    }}>
+                      {stat.value}
+                    </div>
+                    <div style={{ fontSize: "14px", color: "#64748b" }}>{stat.label}</div>
+                  </div>
+                ))}
               </div>
             </motion.div>
 
             {/* Right side - Hero Image/Animation */}
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
+              style={{ display: isMobile ? "block" : "block" }}
             >
               <div style={{
                 background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
-                borderRadius: "24px",
-                padding: "24px",
+                borderRadius: isMobile ? "20px" : "24px",
+                padding: isMobile ? "16px" : "24px",
                 boxShadow: "0 25px 50px rgba(0, 0, 0, 0.15)",
                 border: "1px solid #334155",
               }}>
                 {/* Code Editor Mock */}
-                <div style={{ marginBottom: "20px" }}>
-                  <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
-                    <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#ef4444" }} />
-                    <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#f59e0b" }} />
-                    <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#22c55e" }} />
+                <div style={{ marginBottom: "16px" }}>
+                  <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+                    <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#ef4444" }} />
+                    <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#f59e0b" }} />
+                    <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#22c55e" }} />
                   </div>
                   <pre style={{
                     fontFamily: "'Fira Code', monospace",
-                    fontSize: "14px",
+                    fontSize: isMobile ? "12px" : "14px",
                     lineHeight: "1.8",
                     margin: 0,
+                    overflow: "auto",
                   }}>
                     <code>
                       <span style={{ color: "#f472b6" }}>x</span>
@@ -293,60 +446,48 @@ export default function LandingPage() {
                 {/* CPU Visualization Mock */}
                 <div style={{
                   background: "linear-gradient(135deg, #312e81 0%, #1e1b4b 100%)",
-                  borderRadius: "16px",
-                  padding: "16px",
+                  borderRadius: "12px",
+                  padding: isMobile ? "12px" : "16px",
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
-                  gap: "12px",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: isMobile ? "8px" : "12px",
                 }}>
-                  <motion.div
-                    animate={{ 
-                      boxShadow: ["0 0 0px #f59e0b", "0 0 20px #f59e0b", "0 0 0px #f59e0b"],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    style={{
-                      background: "rgba(245, 158, 11, 0.2)",
-                      borderRadius: "10px",
-                      padding: "12px",
-                      textAlign: "center",
-                      border: "1px solid #f59e0b",
-                    }}
-                  >
-                    <div style={{ fontSize: "10px", color: "#fbbf24", marginBottom: "4px" }}>CONTROL</div>
-                    <div style={{ fontSize: "12px", color: "white", fontFamily: "monospace" }}>FETCH</div>
-                  </motion.div>
-                  <motion.div
-                    animate={{ 
-                      boxShadow: ["0 0 0px #22c55e", "0 0 20px #22c55e", "0 0 0px #22c55e"],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                    style={{
-                      background: "rgba(34, 197, 94, 0.2)",
-                      borderRadius: "10px",
-                      padding: "12px",
-                      textAlign: "center",
-                      border: "1px solid #22c55e",
-                    }}
-                  >
-                    <div style={{ fontSize: "10px", color: "#4ade80", marginBottom: "4px" }}>ALU</div>
-                    <div style={{ fontSize: "14px", color: "white", fontFamily: "monospace", fontWeight: "bold" }}>5 + 10 = 15</div>
-                  </motion.div>
-                  <motion.div
-                    animate={{ 
-                      boxShadow: ["0 0 0px #a855f7", "0 0 20px #a855f7", "0 0 0px #a855f7"],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-                    style={{
-                      background: "rgba(168, 85, 247, 0.2)",
-                      borderRadius: "10px",
-                      padding: "12px",
-                      textAlign: "center",
-                      border: "1px solid #a855f7",
-                    }}
-                  >
-                    <div style={{ fontSize: "10px", color: "#c084fc", marginBottom: "4px" }}>REGISTERS</div>
-                    <div style={{ fontSize: "12px", color: "white", fontFamily: "monospace" }}>ACC: 15</div>
-                  </motion.div>
+                  {[
+                    { label: "CONTROL", value: "FETCH", color: "#f59e0b" },
+                    { label: "ALU", value: "5+10=15", color: "#22c55e" },
+                    { label: "REG", value: "ACC:15", color: "#a855f7" },
+                  ].map((item, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ 
+                        boxShadow: [`0 0 0px ${item.color}`, `0 0 15px ${item.color}`, `0 0 0px ${item.color}`],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity, delay: i * 0.5 }}
+                      style={{
+                        background: `${item.color}20`,
+                        borderRadius: "8px",
+                        padding: isMobile ? "8px" : "12px",
+                        textAlign: "center",
+                        border: `1px solid ${item.color}`,
+                      }}
+                    >
+                      <div style={{ 
+                        fontSize: isMobile ? "8px" : "10px", 
+                        color: item.color, 
+                        marginBottom: "2px" 
+                      }}>
+                        {item.label}
+                      </div>
+                      <div style={{ 
+                        fontSize: isMobile ? "10px" : "12px", 
+                        color: "white", 
+                        fontFamily: "monospace",
+                        fontWeight: "bold",
+                      }}>
+                        {item.value}
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
             </motion.div>
@@ -355,63 +496,81 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" style={{ padding: "100px 24px", background: "#ffffff" }}>
+      <section id="features" style={{ 
+        padding: isMobile ? "60px 20px" : "100px 24px", 
+        background: "#ffffff" 
+      }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            style={{ textAlign: "center", marginBottom: "60px" }}
+            style={{ textAlign: "center", marginBottom: isMobile ? "40px" : "60px" }}
           >
-            <h2 style={{ fontSize: "42px", fontWeight: "800", color: "#0f172a", marginBottom: "16px" }}>
+            <h2 style={{ 
+              fontSize: isMobile ? "28px" : "42px", 
+              fontWeight: "800", 
+              color: "#0f172a", 
+              marginBottom: "16px" 
+            }}>
               Why Visual Python?
             </h2>
-            <p style={{ fontSize: "18px", color: "#64748b", maxWidth: "600px", margin: "0 auto" }}>
+            <p style={{ 
+              fontSize: isMobile ? "15px" : "18px", 
+              color: "#64748b", 
+              maxWidth: "600px", 
+              margin: "0 auto",
+              padding: isMobile ? "0 10px" : 0,
+            }}>
               Traditional tutorials show you what code does. We show you how it actually works inside the computer.
             </p>
           </motion.div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "32px" }}>
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", 
+            gap: isMobile ? "16px" : "32px" 
+          }}>
             {[
               {
-                icon: <Cpu style={{ width: "28px", height: "28px" }} />,
+                icon: <Cpu style={{ width: "24px", height: "24px" }} />,
                 title: "Hardware Visualization",
-                description: "Watch data flow through CPU components - Control Unit, ALU, and Registers - in real-time animations.",
+                description: "Watch data flow through CPU components in real-time animations.",
                 color: "#6366f1",
                 bg: "#eef2ff",
               },
               {
-                icon: <Eye style={{ width: "28px", height: "28px" }} />,
+                icon: <Eye style={{ width: "24px", height: "24px" }} />,
                 title: "Step-by-Step Execution",
-                description: "See the Fetch-Decode-Execute cycle in action. Understand what happens at each phase.",
+                description: "See the Fetch-Decode-Execute cycle in action.",
                 color: "#22c55e",
                 bg: "#dcfce7",
               },
               {
-                icon: <Database style={{ width: "28px", height: "28px" }} />,
+                icon: <Database style={{ width: "24px", height: "24px" }} />,
                 title: "Memory Visualization",
-                description: "See how variables are stored in RAM, with real memory addresses and type information.",
+                description: "See how variables are stored in RAM with real addresses.",
                 color: "#f59e0b",
                 bg: "#fef3c7",
               },
               {
-                icon: <BookOpen style={{ width: "28px", height: "28px" }} />,
+                icon: <BookOpen style={{ width: "24px", height: "24px" }} />,
                 title: "MIT-Based Curriculum",
-                description: "Follow a structured curriculum based on MIT's 'Introduction to Computation and Programming'.",
+                description: "Structured curriculum based on MIT's programming course.",
                 color: "#ec4899",
                 bg: "#fce7f3",
               },
               {
-                icon: <Code style={{ width: "28px", height: "28px" }} />,
+                icon: <Code style={{ width: "24px", height: "24px" }} />,
                 title: "Interactive Exercises",
-                description: "Practice with coding challenges that test your understanding. Earn XP as you progress.",
+                description: "Practice with coding challenges and earn XP.",
                 color: "#8b5cf6",
                 bg: "#f3e8ff",
               },
               {
-                icon: <Zap style={{ width: "28px", height: "28px" }} />,
+                icon: <Zap style={{ width: "24px", height: "24px" }} />,
                 title: "Instant Feedback",
-                description: "Run code directly in your browser with Pyodide. No setup required - just start coding.",
+                description: "Run code in your browser. No setup required.",
                 color: "#06b6d4",
                 bg: "#cffafe",
               },
@@ -421,33 +580,40 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(0,0,0,0.1)" }}
+                transition={{ delay: index * 0.05 }}
                 style={{
                   background: "#ffffff",
-                  borderRadius: "20px",
-                  padding: "32px",
+                  borderRadius: "16px",
+                  padding: isMobile ? "20px" : "32px",
                   border: "1px solid #e2e8f0",
-                  transition: "all 0.3s ease",
                 }}
               >
                 <div style={{
-                  width: "56px",
-                  height: "56px",
-                  borderRadius: "16px",
+                  width: isMobile ? "48px" : "56px",
+                  height: isMobile ? "48px" : "56px",
+                  borderRadius: "14px",
                   background: feature.bg,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: feature.color,
-                  marginBottom: "20px",
+                  marginBottom: "16px",
                 }}>
                   {feature.icon}
                 </div>
-                <h3 style={{ fontSize: "20px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>
+                <h3 style={{ 
+                  fontSize: isMobile ? "17px" : "20px", 
+                  fontWeight: "700", 
+                  color: "#1e293b", 
+                  marginBottom: "8px" 
+                }}>
                   {feature.title}
                 </h3>
-                <p style={{ fontSize: "15px", color: "#64748b", lineHeight: "1.6" }}>
+                <p style={{ 
+                  fontSize: isMobile ? "14px" : "15px", 
+                  color: "#64748b", 
+                  lineHeight: "1.6" 
+                }}>
                   {feature.description}
                 </p>
               </motion.div>
@@ -458,7 +624,7 @@ export default function LandingPage() {
 
       {/* How It Works Section */}
       <section id="how-it-works" style={{
-        padding: "100px 24px",
+        padding: isMobile ? "60px 20px" : "100px 24px",
         background: "linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)",
       }}>
         <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
@@ -466,70 +632,80 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            style={{ textAlign: "center", marginBottom: "60px" }}
+            style={{ textAlign: "center", marginBottom: isMobile ? "40px" : "60px" }}
           >
-            <h2 style={{ fontSize: "42px", fontWeight: "800", color: "#0f172a", marginBottom: "16px" }}>
+            <h2 style={{ 
+              fontSize: isMobile ? "28px" : "42px", 
+              fontWeight: "800", 
+              color: "#0f172a", 
+              marginBottom: "16px" 
+            }}>
               How It Works
             </h2>
-            <p style={{ fontSize: "18px", color: "#64748b", maxWidth: "600px", margin: "0 auto" }}>
-              Learning to code has never been more intuitive. Follow these simple steps.
+            <p style={{ 
+              fontSize: isMobile ? "15px" : "18px", 
+              color: "#64748b", 
+              maxWidth: "600px", 
+              margin: "0 auto" 
+            }}>
+              Learning to code has never been more intuitive.
             </p>
           </motion.div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {[
               {
                 step: "1",
                 title: "Write Your Code",
-                description: "Use our Python editor with syntax highlighting and auto-completion. Start with simple examples or jump into exercises.",
-                icon: <Code style={{ width: "24px", height: "24px" }} />,
+                description: "Use our Python editor with syntax highlighting.",
+                icon: <Code style={{ width: "20px", height: "20px" }} />,
               },
               {
                 step: "2",
                 title: "Enable Hardware Mode",
-                description: "Toggle Hardware Mode to see the CPU, Memory, and Data Flow panels appear alongside your code.",
-                icon: <Cpu style={{ width: "24px", height: "24px" }} />,
+                description: "See CPU, Memory, and Data Flow panels.",
+                icon: <Cpu style={{ width: "20px", height: "20px" }} />,
               },
               {
                 step: "3",
                 title: "Step Through Execution",
-                description: "Click 'Step' to execute one phase at a time, or 'Auto' to watch the animation. Control the speed to match your learning pace.",
-                icon: <Play style={{ width: "24px", height: "24px" }} />,
+                description: "Watch the animation at your own pace.",
+                icon: <Play style={{ width: "20px", height: "20px" }} />,
               },
               {
                 step: "4",
                 title: "Understand Deeply",
-                description: "Read the explanation panel to understand what's happening at each step. Key concepts are highlighted and explained.",
-                icon: <GraduationCap style={{ width: "24px", height: "24px" }} />,
+                description: "Read explanations for each step.",
+                icon: <GraduationCap style={{ width: "20px", height: "20px" }} />,
               },
             ].map((item, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+                initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  gap: "32px",
+                  alignItems: isMobile ? "flex-start" : "center",
+                  gap: isMobile ? "16px" : "32px",
                   background: "white",
-                  borderRadius: "20px",
-                  padding: "32px",
+                  borderRadius: "16px",
+                  padding: isMobile ? "20px" : "32px",
                   boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
                   border: "1px solid #e2e8f0",
                 }}
               >
                 <div style={{
-                  width: "72px",
-                  height: "72px",
-                  borderRadius: "20px",
+                  width: isMobile ? "48px" : "72px",
+                  height: isMobile ? "48px" : "72px",
+                  borderRadius: isMobile ? "14px" : "20px",
                   background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "white",
-                  fontSize: "28px",
+                  fontSize: isMobile ? "20px" : "28px",
                   fontWeight: "800",
                   flexShrink: 0,
                 }}>
@@ -537,18 +713,22 @@ export default function LandingPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <h3 style={{
-                    fontSize: "22px",
+                    fontSize: isMobile ? "17px" : "22px",
                     fontWeight: "700",
                     color: "#1e293b",
-                    marginBottom: "8px",
+                    marginBottom: "4px",
                     display: "flex",
                     alignItems: "center",
-                    gap: "10px",
+                    gap: "8px",
                   }}>
                     {item.icon}
                     {item.title}
                   </h3>
-                  <p style={{ fontSize: "16px", color: "#64748b", lineHeight: "1.6" }}>
+                  <p style={{ 
+                    fontSize: isMobile ? "14px" : "16px", 
+                    color: "#64748b", 
+                    lineHeight: "1.5" 
+                  }}>
                     {item.description}
                   </p>
                 </div>
@@ -559,23 +739,36 @@ export default function LandingPage() {
       </section>
 
       {/* Curriculum Section */}
-      <section id="curriculum" style={{ padding: "100px 24px", background: "#ffffff" }}>
+      <section id="curriculum" style={{ 
+        padding: isMobile ? "60px 20px" : "100px 24px", 
+        background: "#ffffff" 
+      }}>
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            style={{ textAlign: "center", marginBottom: "60px" }}
+            style={{ textAlign: "center", marginBottom: isMobile ? "40px" : "60px" }}
           >
-            <h2 style={{ fontSize: "42px", fontWeight: "800", color: "#0f172a", marginBottom: "16px" }}>
+            <h2 style={{ 
+              fontSize: isMobile ? "28px" : "42px", 
+              fontWeight: "800", 
+              color: "#0f172a", 
+              marginBottom: "16px" 
+            }}>
               Structured Curriculum
             </h2>
-            <p style={{ fontSize: "18px", color: "#64748b", maxWidth: "600px", margin: "0 auto" }}>
-              Based on MIT's renowned "Introduction to Computation and Programming Using Python" by John V. Guttag.
+            <p style={{ 
+              fontSize: isMobile ? "15px" : "18px", 
+              color: "#64748b", 
+              maxWidth: "600px", 
+              margin: "0 auto" 
+            }}>
+              Based on MIT's programming course by John V. Guttag.
             </p>
           </motion.div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {[
               { num: 1, title: "Getting Started", lessons: 5, status: "available" },
               { num: 2, title: "Core Elements", lessons: 8, status: "coming" },
@@ -592,18 +785,26 @@ export default function LandingPage() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  padding: "24px 28px",
+                  padding: isMobile ? "16px" : "24px 28px",
                   background: chapter.status === "available" ? "white" : "#f8fafc",
-                  borderRadius: "16px",
+                  borderRadius: "14px",
                   border: chapter.status === "available" ? "2px solid #6366f1" : "1px solid #e2e8f0",
                   opacity: chapter.status === "available" ? 1 : 0.7,
+                  flexWrap: isMobile ? "wrap" : "nowrap",
+                  gap: isMobile ? "12px" : "20px",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <div style={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: isMobile ? "12px" : "20px",
+                  flex: 1,
+                  minWidth: 0,
+                }}>
                   <div style={{
-                    width: "52px",
-                    height: "52px",
-                    borderRadius: "14px",
+                    width: isMobile ? "40px" : "52px",
+                    height: isMobile ? "40px" : "52px",
+                    borderRadius: "12px",
                     background: chapter.status === "available"
                       ? "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
                       : "#e2e8f0",
@@ -611,51 +812,62 @@ export default function LandingPage() {
                     alignItems: "center",
                     justifyContent: "center",
                     color: chapter.status === "available" ? "white" : "#94a3b8",
-                    fontSize: "20px",
+                    fontSize: isMobile ? "16px" : "20px",
                     fontWeight: "700",
+                    flexShrink: 0,
                   }}>
                     {chapter.num}
                   </div>
-                  <div>
-                    <h3 style={{ fontSize: "18px", fontWeight: "600", color: "#1e293b" }}>
-                      Chapter {chapter.num}: {chapter.title}
+                  <div style={{ minWidth: 0 }}>
+                    <h3 style={{ 
+                      fontSize: isMobile ? "15px" : "18px", 
+                      fontWeight: "600", 
+                      color: "#1e293b",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}>
+                      {isMobile ? chapter.title : `Chapter ${chapter.num}: ${chapter.title}`}
                     </h3>
-                    <p style={{ fontSize: "14px", color: "#64748b" }}>
+                    <p style={{ fontSize: isMobile ? "12px" : "14px", color: "#64748b" }}>
                       {chapter.lessons} lessons
                     </p>
                   </div>
                 </div>
                 {chapter.status === "available" ? (
-                  <Link href="/learn" style={{ textDecoration: "none" }}>
+                  <Link href="/learn" style={{ textDecoration: "none", flexShrink: 0 }}>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "8px",
-                        padding: "10px 20px",
+                        gap: "6px",
+                        padding: isMobile ? "10px 16px" : "10px 20px",
                         borderRadius: "10px",
                         border: "none",
                         background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
                         color: "white",
-                        fontSize: "14px",
+                        fontSize: isMobile ? "13px" : "14px",
                         fontWeight: "600",
                         cursor: "pointer",
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      Start Learning
+                      Start
                       <ChevronRight style={{ width: "16px", height: "16px" }} />
                     </motion.button>
                   </Link>
                 ) : (
                   <span style={{
-                    padding: "8px 16px",
+                    padding: isMobile ? "6px 12px" : "8px 16px",
                     borderRadius: "20px",
                     background: "#f1f5f9",
                     color: "#94a3b8",
-                    fontSize: "13px",
+                    fontSize: isMobile ? "11px" : "13px",
                     fontWeight: "500",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
                   }}>
                     Coming Soon
                   </span>
@@ -668,60 +880,58 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section style={{
-        padding: "100px 24px",
+        padding: isMobile ? "60px 20px" : "100px 24px",
         background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)",
         position: "relative",
         overflow: "hidden",
       }}>
-        <div style={{
-          position: "absolute",
-          top: "-50%",
-          right: "-20%",
-          width: "600px",
-          height: "600px",
-          background: "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
-          borderRadius: "50%",
-        }} />
-
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center", position: "relative" }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 style={{ fontSize: "46px", fontWeight: "800", color: "white", marginBottom: "20px" }}>
+            <h2 style={{ 
+              fontSize: isMobile ? "28px" : "46px", 
+              fontWeight: "800", 
+              color: "white", 
+              marginBottom: "16px" 
+            }}>
               Ready to See Code Differently?
             </h2>
-            <p style={{ fontSize: "18px", color: "rgba(255,255,255,0.9)", marginBottom: "40px", lineHeight: "1.7" }}>
-              Master Python by understanding how computers really work. Start your journey today - completely free. 
-              Start your journey today - it's completely free.
+            <p style={{ 
+              fontSize: isMobile ? "15px" : "18px", 
+              color: "rgba(255,255,255,0.9)", 
+              marginBottom: "32px", 
+              lineHeight: "1.7" 
+            }}>
+              Master Python by understanding how computers really work. 
+              Start your journey today - completely free.
             </p>
-            <div style={{ display: "flex", gap: "16px", justifyContent: "center" }}>
-              <Link href="/register" style={{ textDecoration: "none" }}>
-                <motion.button
-                  whileHover={{ scale: 1.02, boxShadow: "0 8px 30px rgba(0,0,0,0.2)" }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "18px 36px",
-                    borderRadius: "14px",
-                    border: "none",
-                    background: "white",
-                    color: "#6366f1",
-                    fontSize: "17px",
-                    fontWeight: "700",
-                    cursor: "pointer",
-                  }}
-                >
-                  Get Started Free
-                  <ArrowRight style={{ width: "20px", height: "20px" }} />
-                </motion.button>
-              </Link>
-            </div>
-            <p style={{ marginTop: "20px", fontSize: "14px", color: "rgba(255,255,255,0.7)" }}>
-              No credit card required • Start learning in seconds
+            <Link href="/register" style={{ textDecoration: "none" }}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: isMobile ? "16px 32px" : "18px 36px",
+                  borderRadius: "14px",
+                  border: "none",
+                  background: "white",
+                  color: "#6366f1",
+                  fontSize: isMobile ? "16px" : "17px",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                }}
+              >
+                Get Started Free
+                <ArrowRight style={{ width: "20px", height: "20px" }} />
+              </motion.button>
+            </Link>
+            <p style={{ marginTop: "16px", fontSize: "13px", color: "rgba(255,255,255,0.7)" }}>
+              No credit card required
             </p>
           </motion.div>
         </div>
@@ -729,84 +939,81 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer style={{
-        padding: "60px 24px 40px",
+        padding: isMobile ? "40px 20px 30px" : "60px 24px 40px",
         background: "#0f172a",
         color: "white",
       }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{
             display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1fr",
-            gap: "60px",
-            marginBottom: "40px",
+            gridTemplateColumns: isMobile ? "1fr 1fr" : "2fr 1fr 1fr 1fr",
+            gap: isMobile ? "32px" : "60px",
+            marginBottom: "32px",
           }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+            <div style={{ gridColumn: isMobile ? "1 / -1" : "auto" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
                 <div style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "12px",
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "10px",
                   background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "20px",
+                  fontSize: "18px",
                 }}>
                   🐍
                 </div>
-                <span style={{ fontSize: "20px", fontWeight: "700" }}>Visual Python</span>
+                <span style={{ fontSize: "18px", fontWeight: "700" }}>Visual Python</span>
               </div>
-              <p style={{ fontSize: "14px", color: "#94a3b8", lineHeight: "1.7", maxWidth: "300px" }}>
-                Learn Python by seeing how code executes through CPU and memory. 
-                A visual approach to understanding programming.
+              <p style={{ 
+                fontSize: "13px", 
+                color: "#94a3b8", 
+                lineHeight: "1.6", 
+                maxWidth: "280px" 
+              }}>
+                Learn Python by seeing how code executes through CPU and memory.
               </p>
             </div>
 
             <div>
-              <h4 style={{ fontSize: "14px", fontWeight: "600", marginBottom: "16px", color: "#f1f5f9" }}>
+              <h4 style={{ fontSize: "13px", fontWeight: "600", marginBottom: "12px", color: "#f1f5f9" }}>
                 Platform
               </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <Link href="/learn" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "14px" }}>Curriculum</Link>
-                <Link href="/ide" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "14px" }}>IDE</Link>
-                <Link href="#features" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "14px" }}>Features</Link>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <Link href="/learn" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "13px" }}>Curriculum</Link>
+                <Link href="/ide" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "13px" }}>IDE</Link>
               </div>
             </div>
 
             <div>
-              <h4 style={{ fontSize: "14px", fontWeight: "600", marginBottom: "16px", color: "#f1f5f9" }}>
+              <h4 style={{ fontSize: "13px", fontWeight: "600", marginBottom: "12px", color: "#f1f5f9" }}>
                 Company
               </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <Link href="#" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "14px" }}>About</Link>
-                <Link href="#" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "14px" }}>Blog</Link>
-                <Link href="#" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "14px" }}>Contact</Link>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <Link href="#" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "13px" }}>About</Link>
+                <Link href="#" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "13px" }}>Contact</Link>
               </div>
             </div>
 
             <div>
-              <h4 style={{ fontSize: "14px", fontWeight: "600", marginBottom: "16px", color: "#f1f5f9" }}>
+              <h4 style={{ fontSize: "13px", fontWeight: "600", marginBottom: "12px", color: "#f1f5f9" }}>
                 Legal
               </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <Link href="#" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "14px" }}>Privacy Policy</Link>
-                <Link href="#" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "14px" }}>Terms of Service</Link>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <Link href="#" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "13px" }}>Privacy</Link>
+                <Link href="#" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "13px" }}>Terms</Link>
               </div>
             </div>
           </div>
 
           <div style={{
             borderTop: "1px solid #1e293b",
-            paddingTop: "24px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            paddingTop: "20px",
+            textAlign: isMobile ? "center" : "left",
           }}>
-            <p style={{ fontSize: "13px", color: "#64748b" }}>
+            <p style={{ fontSize: "12px", color: "#64748b" }}>
               © 2025 Hadi Yaqoobi. All rights reserved.
-            </p>
-            <p style={{ fontSize: "13px", color: "#64748b" }}>
-              
             </p>
           </div>
         </div>
