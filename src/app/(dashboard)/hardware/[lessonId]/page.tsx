@@ -1,16 +1,71 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Home, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Home, CheckCircle, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 
-// Dynamically import hardware components
-const BinaryLightShow = dynamic(() => import("@/components/hardware/digital/BinaryLightShow"), { ssr: false });
-const LogicGates = dynamic(() => import("@/components/hardware/digital/LogicGates"), { ssr: false });
+// Loading placeholder for 3D components
+function LoadingPlaceholder({ text }: { text: string }) {
+  return (
+    <div style={{
+      width: '100%',
+      height: '600px',
+      background: 'linear-gradient(135deg, #0A0A1E 0%, #1A1A3E 100%)',
+      borderRadius: '16px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '16px',
+    }}>
+      <div style={{
+        width: '60px',
+        height: '60px',
+        border: '3px solid #1a1a3e',
+        borderTopColor: '#00FFFF',
+        borderRadius: '50%',
+        animation: 'spin 1s linear infinite',
+      }} />
+      <p style={{
+        fontFamily: "'JetBrains Mono', monospace",
+        color: '#00FFFF',
+        fontSize: '14px',
+      }}>
+        {text}
+      </p>
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ============================================
+// 3D COMPONENTS (Revolutionary)
+// ============================================
+const BinaryMatrix3D = dynamic(
+  () => import("@/components/hardware/digital3d/BinaryMatrix3D").then(mod => mod.BinaryMatrix3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Binary Matrix 3D..." /> }
+);
+
+const LogicGates3D = dynamic(
+  () => import("@/components/hardware/digital3d/LogicGates3D").then(mod => mod.LogicGates3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Logic Gates 3D..." /> }
+);
+
+const ALUChamber3D = dynamic(
+  () => import("@/components/hardware/digital3d/ALUChamber3D").then(mod => mod.ALUChamber3D),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading ALU Chamber 3D..." /> }
+);
+
+// ============================================
+// 2D COMPONENTS (Standard)
+// ============================================
 const AnimatedAdder = dynamic(() => import("@/components/hardware/digital/AnimatedAdder"), { ssr: false });
-const ALUSimulator = dynamic(() => import("@/components/hardware/digital/ALUSimulator"), { ssr: false });
 const RegisterFile = dynamic(() => import("@/components/hardware/digital/RegisterFile"), { ssr: false });
 
 const ControlUnit = dynamic(() => import("@/components/hardware/cpu/ControlUnit"), { ssr: false });
@@ -32,7 +87,9 @@ const CompleteSystemTrace = dynamic(() => import("@/components/hardware/integrat
 const SideBySideView = dynamic(() => import("@/components/hardware/integration/SideBySideView"), { ssr: false });
 const MentalModelBuilder = dynamic(() => import("@/components/hardware/integration/MentalModelBuilder"), { ssr: false });
 
-// Lesson metadata
+// ============================================
+// LESSON CONFIGURATION
+// ============================================
 const LESSONS: Record<string, {
   id: string;
   title: string;
@@ -40,25 +97,28 @@ const LESSONS: Record<string, {
   moduleColor: string;
   description: string;
   component: React.ComponentType;
+  is3D?: boolean;
   prev?: string;
   next?: string;
 }> = {
   h1: {
     id: "H1",
-    title: "Binary Light Show",
+    title: "Binary Matrix 3D",
     module: "Digital Foundations",
     moduleColor: "#3b82f6",
-    description: "Interactive 8-bit LED binary display - learn how computers represent numbers",
-    component: BinaryLightShow,
+    description: "Interactive 3D binary display with glowing cubes and particle effects",
+    component: BinaryMatrix3D,
+    is3D: true,
     next: "h2",
   },
   h2: {
     id: "H2",
-    title: "Logic Gates Playground",
+    title: "Logic Gates 3D Circuit Lab",
     module: "Digital Foundations",
     moduleColor: "#3b82f6",
-    description: "AND, OR, NOT, XOR - the building blocks of all computation",
-    component: LogicGates,
+    description: "3D logic gates with electron flow visualization",
+    component: LogicGates3D,
+    is3D: true,
     prev: "h1",
     next: "h3",
   },
@@ -74,11 +134,12 @@ const LESSONS: Record<string, {
   },
   h4: {
     id: "H4",
-    title: "ALU Simulator",
+    title: "ALU Computation Chamber",
     module: "Digital Foundations",
     moduleColor: "#3b82f6",
-    description: "The Arithmetic Logic Unit - heart of computation",
-    component: ALUSimulator,
+    description: "3D ALU with particle data streams and operation visualization",
+    component: ALUChamber3D,
+    is3D: true,
     prev: "h3",
     next: "h5",
   },
@@ -243,6 +304,9 @@ const LESSONS: Record<string, {
   },
 };
 
+// ============================================
+// MAIN PAGE COMPONENT
+// ============================================
 export default function HardwareLessonPage() {
   const params = useParams();
   const router = useRouter();
@@ -255,24 +319,27 @@ export default function HardwareLessonPage() {
     return (
       <div style={{
         minHeight: "100vh",
-        background: "#f8fafc",
+        background: "#0A0A1E",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
         gap: 16,
       }}>
-        <h1 style={{ fontSize: 24, color: "#1e293b" }}>Lesson not found</h1>
+        <h1 style={{ fontSize: 24, color: "#fff", fontFamily: "'JetBrains Mono', monospace" }}>
+          Lesson not found
+        </h1>
         <button
           onClick={() => router.push("/hardware")}
           style={{
             padding: "12px 24px",
-            background: "#6366f1",
+            background: "linear-gradient(135deg, #00AAFF, #FF00FF)",
             color: "white",
             border: "none",
             borderRadius: 8,
             cursor: "pointer",
             fontSize: 16,
+            fontFamily: "'JetBrains Mono', monospace",
           }}
         >
           Back to Hardware
@@ -284,16 +351,20 @@ export default function HardwareLessonPage() {
   const LessonComponent = lesson.component;
   const progress = (Object.keys(LESSONS).indexOf(lessonId) + 1) / Object.keys(LESSONS).length * 100;
 
+  // Use dark theme for 3D lessons
+  const isDark = lesson.is3D;
+
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
+    <div style={{ minHeight: "100vh", background: isDark ? "#0A0A1E" : "#f8fafc" }}>
       {/* Header */}
       <div style={{
-        background: "white",
-        borderBottom: "1px solid #e2e8f0",
+        background: isDark ? "rgba(10, 10, 30, 0.95)" : "white",
+        borderBottom: isDark ? "1px solid rgba(0, 255, 255, 0.1)" : "1px solid #e2e8f0",
         padding: "16px 32px",
         position: "sticky",
         top: 0,
         zIndex: 50,
+        backdropFilter: "blur(10px)",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -304,19 +375,20 @@ export default function HardwareLessonPage() {
                 alignItems: "center",
                 gap: 8,
                 padding: "8px 16px",
-                background: "#f1f5f9",
-                border: "none",
+                background: isDark ? "rgba(0, 170, 255, 0.1)" : "#f1f5f9",
+                border: isDark ? "1px solid rgba(0, 255, 255, 0.2)" : "none",
                 borderRadius: 8,
                 cursor: "pointer",
-                color: "#64748b",
+                color: isDark ? "#00FFFF" : "#64748b",
                 fontSize: 14,
+                fontFamily: isDark ? "'JetBrains Mono', monospace" : "inherit",
               }}
             >
               <Home style={{ width: 16, height: 16 }} />
               All Lessons
             </button>
             
-            <div style={{ height: 24, width: 1, background: "#e2e8f0" }} />
+            <div style={{ height: 24, width: 1, background: isDark ? "#1a1a3e" : "#e2e8f0" }} />
             
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -330,9 +402,31 @@ export default function HardwareLessonPage() {
                 }}>
                   {lesson.module}
                 </span>
-                <span style={{ fontSize: 12, color: "#94a3b8" }}>{lesson.id}</span>
+                <span style={{ fontSize: 12, color: isDark ? "#666" : "#94a3b8" }}>{lesson.id}</span>
+                {lesson.is3D && (
+                  <span style={{
+                    fontSize: 10,
+                    padding: "2px 6px",
+                    borderRadius: 4,
+                    background: "linear-gradient(135deg, #00AAFF, #FF00FF)",
+                    color: "white",
+                    fontWeight: 600,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                  }}>
+                    <Sparkles style={{ width: 10, height: 10 }} />
+                    3D
+                  </span>
+                )}
               </div>
-              <h1 style={{ fontSize: 18, fontWeight: 600, color: "#1e293b", margin: "4px 0 0" }}>
+              <h1 style={{ 
+                fontSize: 18, 
+                fontWeight: 600, 
+                color: isDark ? "#fff" : "#1e293b", 
+                margin: "4px 0 0",
+                fontFamily: isDark ? "'JetBrains Mono', monospace" : "inherit",
+              }}>
                 {lesson.title}
               </h1>
             </div>
@@ -344,18 +438,20 @@ export default function HardwareLessonPage() {
               <div style={{
                 width: 120,
                 height: 6,
-                background: "#e2e8f0",
+                background: isDark ? "#1a1a3e" : "#e2e8f0",
                 borderRadius: 3,
               }}>
                 <div style={{
                   width: `${progress}%`,
                   height: "100%",
-                  background: lesson.moduleColor,
+                  background: isDark 
+                    ? "linear-gradient(90deg, #00AAFF, #FF00FF)" 
+                    : lesson.moduleColor,
                   borderRadius: 3,
                   transition: "width 0.3s",
                 }} />
               </div>
-              <span style={{ fontSize: 12, color: "#64748b" }}>
+              <span style={{ fontSize: 12, color: isDark ? "#666" : "#64748b" }}>
                 {Math.round(progress)}%
               </span>
             </div>
@@ -367,14 +463,19 @@ export default function HardwareLessonPage() {
                 disabled={!lesson.prev}
                 style={{
                   padding: "8px 16px",
-                  background: lesson.prev ? "#f1f5f9" : "#f8fafc",
-                  border: "none",
+                  background: lesson.prev 
+                    ? (isDark ? "rgba(0, 170, 255, 0.1)" : "#f1f5f9")
+                    : (isDark ? "#0a0a1e" : "#f8fafc"),
+                  border: isDark ? "1px solid rgba(0, 255, 255, 0.2)" : "none",
                   borderRadius: 8,
                   cursor: lesson.prev ? "pointer" : "not-allowed",
-                  color: lesson.prev ? "#64748b" : "#cbd5e1",
+                  color: lesson.prev 
+                    ? (isDark ? "#00FFFF" : "#64748b")
+                    : (isDark ? "#333" : "#cbd5e1"),
                   display: "flex",
                   alignItems: "center",
                   gap: 4,
+                  fontFamily: isDark ? "'JetBrains Mono', monospace" : "inherit",
                 }}
               >
                 <ArrowLeft style={{ width: 16, height: 16 }} />
@@ -390,7 +491,9 @@ export default function HardwareLessonPage() {
                 }}
                 style={{
                   padding: "8px 16px",
-                  background: isComplete ? "#22c55e" : lesson.moduleColor,
+                  background: isComplete 
+                    ? "#22c55e" 
+                    : (isDark ? "linear-gradient(135deg, #00AAFF, #FF00FF)" : lesson.moduleColor),
                   border: "none",
                   borderRadius: 8,
                   cursor: "pointer",
@@ -399,6 +502,8 @@ export default function HardwareLessonPage() {
                   alignItems: "center",
                   gap: 4,
                   fontWeight: 500,
+                  fontFamily: isDark ? "'JetBrains Mono', monospace" : "inherit",
+                  boxShadow: isDark ? "0 0 20px rgba(0, 170, 255, 0.3)" : "none",
                 }}
               >
                 {isComplete ? (
@@ -421,7 +526,7 @@ export default function HardwareLessonPage() {
       </div>
 
       {/* Lesson Content */}
-      <div style={{ padding: "32px" }}>
+      <div style={{ padding: isDark ? "24px" : "32px" }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
