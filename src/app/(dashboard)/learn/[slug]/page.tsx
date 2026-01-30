@@ -6,16 +6,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { 
-  ChevronLeft, 
-  ChevronRight, 
   BookOpen, 
   Clock, 
+  ChevronLeft,
+  ChevronRight,
   Target,
   Lightbulb,
   Code,
-  CheckCircle,
   Play,
-  Sparkles,
   Zap,
   Trophy
 } from "lucide-react";
@@ -23,22 +21,22 @@ import { Spinner } from "@/components/ui";
 import { CodeEditor } from "@/components/ide/CodeEditor";
 import { usePython } from "@/hooks/usePython";
 
-interface CodeExample {
-  id: string;
-  title: string;
-  code: string;
-  description?: string;
-}
-
 interface Exercise {
   id: string;
   number: number;
   title: string;
   prompt: string;
-  type: string;
-  starterCode?: string;
+  starterCode: string;
+  solution: string;
   hints: string[];
   xpReward: number;
+}
+
+interface CodeExample {
+  id: string;
+  title: string;
+  description: string;
+  code: string;
 }
 
 interface Lesson {
@@ -46,87 +44,81 @@ interface Lesson {
   number: number;
   title: string;
   slug: string;
-  objectives: string[];
   content: string;
-  codeExamples: CodeExample[];
+  objectives: string[];
   keyPoints: string[];
-  hardwareDemo?: string;
   estimatedTime: number;
   difficulty: string;
   exercises: Exercise[];
+  codeExamples: CodeExample[];
+  hardwareDemo?: string;
+  prevLesson?: { slug: string; title: string };
+  nextLesson?: { slug: string; title: string };
   section: {
-    number: number;
-    title: string;
     chapter: {
+      id: string;
       number: number;
       title: string;
     };
   };
-  prevLesson?: { slug: string; title: string };
-  nextLesson?: { slug: string; title: string };
 }
 
 export default function LessonPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const router = useRouter();
   const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"lesson" | "exercises">("lesson");
   const [selectedExample, setSelectedExample] = useState<CodeExample | null>(null);
   const [exampleOutput, setExampleOutput] = useState<string>("");
-  const [isRunning, setIsRunning] = useState(false);
-
   const { isReady: isPythonReady, runCode } = usePython();
+  const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
     async function fetchLesson() {
-      setIsLoading(true);
-      setError(null);
       try {
         const res = await fetch(`/api/curriculum/lessons/${slug}`);
-        if (!res.ok) {
-          throw new Error("Lesson not found");
+        if (res.ok) {
+          const data = await res.json();
+          setLesson(data);
+          if (data.codeExamples?.length > 0) {
+            setSelectedExample(data.codeExamples[0]);
+          }
+        } else {
+          router.push("/learn");
         }
-        const data = await res.json();
-        setLesson(data);
-        if (data.codeExamples?.length > 0) {
-          setSelectedExample(data.codeExamples[0]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch lesson:", err);
-        setError("Lesson not found");
+      } catch (error) {
+        console.error("Failed to fetch lesson:", error);
+        router.push("/learn");
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     }
-    if (slug) {
-      fetchLesson();
-    }
-  }, [slug]);
+    fetchLesson();
+  }, [slug, router]);
 
   const handleRunExample = async () => {
-    if (!selectedExample || !isPythonReady) return;
+    if (!isPythonReady || !selectedExample) return;
     setIsRunning(true);
-    setExampleOutput("▶ Running...");
+    setExampleOutput("Running...");
     
     const result = await runCode(selectedExample.code);
     
     if (result.success) {
-      setExampleOutput(result.output || "✓ Code ran successfully (no output)");
+      setExampleOutput(result.output || "Code executed successfully (no output)");
     } else {
-      setExampleOutput(`❌ Error: ${result.error}`);
+      setExampleOutput(`Error: ${result.error}`);
     }
     setIsRunning(false);
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div style={{
+        minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        height: "100vh",
         background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
       }}>
         <div style={{ textAlign: "center" }}>
@@ -137,102 +129,54 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
     );
   }
 
-  if (error || !lesson) {
-    return (
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-      }}>
-        <div style={{ fontSize: "64px", marginBottom: "16px" }}>📚</div>
-        <h1 style={{ fontSize: "24px", fontWeight: "700", color: "#1e293b", marginBottom: "8px" }}>
-          Lesson Not Found
-        </h1>
-        <p style={{ color: "#64748b", marginBottom: "24px" }}>
-          The lesson you're looking for doesn't exist.
-        </p>
-        <Link href="/learn">
-          <button style={{
-            padding: "12px 24px",
-            borderRadius: "10px",
-            border: "none",
-            background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-            color: "white",
-            fontSize: "14px",
-            fontWeight: "600",
-            cursor: "pointer",
-          }}>
-            Back to Lessons
-          </button>
-        </Link>
-      </div>
-    );
+  if (!lesson) {
+    return null;
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)" }}>
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+    }}>
       {/* Header */}
       <div style={{
         background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-        padding: "20px 24px",
+        padding: "24px",
         color: "white",
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-        boxShadow: "0 4px 20px rgba(99, 102, 241, 0.3)",
       }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+            <Link href="/learn" style={{ color: "rgba(255,255,255,0.8)", textDecoration: "none", fontSize: "14px" }}>
+              Learn
+            </Link>
+            <ChevronRight style={{ width: "14px", height: "14px", opacity: 0.6 }} />
+            <span style={{ fontSize: "14px", opacity: 0.8 }}>
+              Chapter {lesson.section.chapter.number}: {lesson.section.chapter.title}
+            </span>
+          </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <Link href="/learn" style={{ textDecoration: "none" }}>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "10px 14px",
-                    borderRadius: "10px",
-                    border: "none",
-                    background: "rgba(255,255,255,0.2)",
-                    color: "white",
-                    fontSize: "13px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                    backdropFilter: "blur(10px)",
-                  }}
-                >
-                  <ChevronLeft style={{ width: "18px", height: "18px" }} />
-                  Back
-                </motion.button>
-              </Link>
-              <div>
-                <div style={{ fontSize: "12px", opacity: 0.8, marginBottom: "2px" }}>
-                  Chapter {lesson.section.chapter.number} • {lesson.section.title}
-                </div>
-                <h1 style={{ fontSize: "20px", fontWeight: "700" }}>
-                  {lesson.title}
-                </h1>
+            <div>
+              <h1 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "8px" }}>
+                Lesson {lesson.number}: {lesson.title}
+              </h1>
+              <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "14px", opacity: 0.9 }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <Clock style={{ width: "16px", height: "16px" }} />
+                  {lesson.estimatedTime} min
+                </span>
+                <span style={{
+                  padding: "4px 12px",
+                  borderRadius: "20px",
+                  background: "rgba(255,255,255,0.2)",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                }}>
+                  {lesson.difficulty}
+                </span>
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 14px",
-                background: "rgba(255,255,255,0.2)",
-                borderRadius: "20px",
-                fontSize: "13px",
-              }}>
-                <Clock style={{ width: "14px", height: "14px" }} />
-                {lesson.estimatedTime} min
-              </div>
-              <Link href="/ide" style={{ textDecoration: "none" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <Link href={`/ide?lesson=${lesson.slug}`} style={{ textDecoration: "none" }}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -354,7 +298,7 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                     gap: "8px",
                   }}>
                     <Target style={{ width: "18px", height: "18px" }} />
-                    🎯 Learning Objectives
+                    Learning Objectives
                   </h3>
                   <ul style={{ margin: 0, paddingLeft: "20px" }}>
                     {lesson.objectives.map((obj, i) => (
@@ -394,40 +338,17 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                     <ReactMarkdown
                       components={{
                         h1: ({ children }) => (
-                          <h1 style={{ 
-                            fontSize: "26px", 
-                            fontWeight: "700", 
-                            color: "#1e293b", 
-                            marginBottom: "16px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                          }}>
-                            <Sparkles style={{ width: "24px", height: "24px", color: "#6366f1" }} />
+                          <h1 style={{ fontSize: "26px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>
                             {children}
                           </h1>
                         ),
                         h2: ({ children }) => (
-                          <h2 style={{ 
-                            fontSize: "20px", 
-                            fontWeight: "600", 
-                            color: "#1e293b", 
-                            marginTop: "28px", 
-                            marginBottom: "14px",
-                            paddingBottom: "8px",
-                            borderBottom: "2px solid #e2e8f0",
-                          }}>
+                          <h2 style={{ fontSize: "20px", fontWeight: "600", color: "#1e293b", marginTop: "28px", marginBottom: "14px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
                             {children}
                           </h2>
                         ),
                         h3: ({ children }) => (
-                          <h3 style={{ 
-                            fontSize: "16px", 
-                            fontWeight: "600", 
-                            color: "#1e293b", 
-                            marginTop: "20px", 
-                            marginBottom: "10px" 
-                          }}>
+                          <h3 style={{ fontSize: "16px", fontWeight: "600", color: "#1e293b", marginTop: "20px", marginBottom: "10px" }}>
                             {children}
                           </h3>
                         ),
@@ -441,74 +362,19 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                           const isBlock = className?.includes("language-");
                           if (isBlock) {
                             return (
-                              <pre style={{
-                                background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
-                                borderRadius: "12px",
-                                padding: "20px",
-                                overflow: "auto",
-                                margin: "20px 0",
-                                border: "1px solid #334155",
-                              }}>
-                                <code style={{ 
-                                  color: "#4ade80", 
-                                  fontFamily: "'Fira Code', monospace", 
-                                  fontSize: "14px",
-                                  lineHeight: "1.6",
-                                }}>
+                              <pre style={{ background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", borderRadius: "12px", padding: "20px", overflow: "auto", margin: "20px 0", border: "1px solid #334155" }}>
+                                <code style={{ color: "#4ade80", fontFamily: "'Fira Code', monospace", fontSize: "14px", lineHeight: "1.6" }}>
                                   {children}
                                 </code>
                               </pre>
                             );
                           }
                           return (
-                            <code style={{
-                              background: "#fef3c7",
-                              padding: "2px 8px",
-                              borderRadius: "6px",
-                              fontFamily: "'Fira Code', monospace",
-                              fontSize: "13px",
-                              color: "#92400e",
-                              fontWeight: "500",
-                            }}>
+                            <code style={{ background: "#fef3c7", padding: "2px 8px", borderRadius: "6px", fontFamily: "'Fira Code', monospace", fontSize: "13px", color: "#92400e", fontWeight: "500" }}>
                               {children}
                             </code>
                           );
                         },
-                        table: ({ children }) => (
-                          <div style={{ overflowX: "auto", margin: "20px 0" }}>
-                            <table style={{ 
-                              width: "100%", 
-                              borderCollapse: "collapse",
-                              borderRadius: "12px",
-                              overflow: "hidden",
-                              border: "1px solid #e2e8f0",
-                            }}>
-                              {children}
-                            </table>
-                          </div>
-                        ),
-                        th: ({ children }) => (
-                          <th style={{ 
-                            background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)", 
-                            padding: "12px 16px", 
-                            textAlign: "left", 
-                            fontSize: "13px", 
-                            fontWeight: "600",
-                            color: "white",
-                          }}>
-                            {children}
-                          </th>
-                        ),
-                        td: ({ children }) => (
-                          <td style={{ 
-                            padding: "12px 16px", 
-                            borderBottom: "1px solid #e2e8f0", 
-                            fontSize: "14px",
-                            background: "white",
-                          }}>
-                            {children}
-                          </td>
-                        ),
                         ul: ({ children }) => (
                           <ul style={{ paddingLeft: "24px", marginBottom: "16px" }}>{children}</ul>
                         ),
@@ -544,7 +410,7 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                     gap: "8px",
                   }}>
                     <Lightbulb style={{ width: "18px", height: "18px" }} />
-                    💡 Key Takeaways
+                    Key Takeaways
                   </h3>
                   <ul style={{ margin: 0, paddingLeft: "20px" }}>
                     {lesson.keyPoints.map((point, i) => (
@@ -553,12 +419,7 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 + i * 0.1 }}
-                        style={{ 
-                          fontSize: "14px", 
-                          color: "#713f12", 
-                          marginBottom: "8px",
-                          lineHeight: "1.5",
-                        }}
+                        style={{ fontSize: "14px", color: "#713f12", marginBottom: "8px", lineHeight: "1.5" }}
                       >
                         {point}
                       </motion.li>
@@ -639,7 +500,7 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                       <p style={{ fontSize: "14px", color: "#475569", marginBottom: "18px", lineHeight: "1.6" }}>
                         {exercise.prompt}
                       </p>
-                      <Link href={`/ide?exercise=${exercise.id}`} style={{ textDecoration: "none" }}>
+                      <Link href={`/ide?exercise=${exercise.id}&lesson=${lesson.slug}`} style={{ textDecoration: "none" }}>
                         <motion.button
                           whileHover={{ scale: 1.02, boxShadow: "0 6px 20px rgba(99, 102, 241, 0.3)" }}
                           whileTap={{ scale: 0.98 }}
@@ -783,7 +644,7 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
               }}>
                 <Code style={{ width: "18px", height: "18px", color: "#4ade80" }} />
                 <span style={{ fontSize: "14px", fontWeight: "600", color: "white" }}>
-                  💻 Try It Yourself
+                  Try It Yourself
                 </span>
               </div>
 
@@ -825,14 +686,8 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                   {selectedExample && (
                     <>
                       {selectedExample.description && (
-                        <div style={{ 
-                          padding: "12px 16px", 
-                          background: "#fef3c7", 
-                          borderBottom: "1px solid #fde68a",
-                          fontSize: "13px",
-                          color: "#92400e",
-                        }}>
-                          💡 {selectedExample.description}
+                        <div style={{ padding: "12px 16px", background: "#fef3c7", borderBottom: "1px solid #fde68a", fontSize: "13px", color: "#92400e" }}>
+                          {selectedExample.description}
                         </div>
                       )}
                       <div style={{ height: "200px" }}>
@@ -877,12 +732,7 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                         </motion.button>
                       </div>
                       {exampleOutput && (
-                        <div style={{
-                          padding: "14px",
-                          background: "#0f172a",
-                          maxHeight: "150px",
-                          overflow: "auto",
-                        }}>
+                        <div style={{ padding: "14px", background: "#0f172a", maxHeight: "150px", overflow: "auto" }}>
                           <div style={{ fontSize: "10px", color: "#64748b", marginBottom: "8px", letterSpacing: "1px" }}>
                             OUTPUT
                           </div>
@@ -890,7 +740,7 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                             margin: 0,
                             fontFamily: "'Fira Code', monospace",
                             fontSize: "13px",
-                            color: exampleOutput.startsWith("❌") ? "#f87171" : "#4ade80",
+                            color: exampleOutput.startsWith("Error") ? "#f87171" : "#4ade80",
                             whiteSpace: "pre-wrap",
                           }}>
                             {exampleOutput}
@@ -931,12 +781,12 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                   alignItems: "center",
                   gap: "8px",
                 }}>
-                  🖥️ Hardware Visualization Tip
+                  Hardware Visualization Tip
                 </h4>
                 <p style={{ fontSize: "13px", color: "#6b7280", marginBottom: "14px", lineHeight: "1.5" }}>
                   {lesson.hardwareDemo}
                 </p>
-                <Link href="/ide" style={{ textDecoration: "none" }}>
+                <Link href={`/ide?lesson=${lesson.slug}`} style={{ textDecoration: "none" }}>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -954,7 +804,7 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                       cursor: "pointer",
                     }}
                   >
-                    <Sparkles style={{ width: "14px", height: "14px" }} />
+                    <Zap style={{ width: "14px", height: "14px" }} />
                     Try Hardware Mode
                   </motion.button>
                 </Link>
