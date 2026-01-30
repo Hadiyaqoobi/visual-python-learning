@@ -19,8 +19,8 @@ import {
 import { Play, RotateCcw, Pause, StepForward, Cpu, Eye, EyeOff, Terminal, Sparkles, Box } from "lucide-react";
 
 // Dynamic import for 3D Hardware Mode (client-side only)
-const HardwareMode3D = dynamic(
-  () => import("@/components/hardware-mode/HardwareMode3D").then(m => m.HardwareMode3D),
+const HardwareModeClean = dynamic(
+  () => import("@/components/hardware-mode/HardwareModeClean").then(m => m.HardwareModeClean),
   { 
     ssr: false,
     loading: () => (
@@ -820,7 +820,7 @@ export default function IDEPage() {
                 background: "#0A0A1E",
               }}
             >
-              <HardwareMode3D
+              <HardwareModeClean
                 executionEvents={execution3DEvents}
                 currentLine={currentLine?.index || 0}
                 isRunning={isRunning || isAutoPlaying}
