@@ -20,6 +20,7 @@ import {
 import { Spinner } from "@/components/ui";
 import { CodeEditor } from "@/components/ide/CodeEditor";
 import { usePython } from "@/hooks/usePython";
+import { LessonVisualization } from "@/components/visualizations/LessonVisualization";
 
 interface Exercise {
   id: string;
@@ -319,6 +320,10 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                     ))}
                   </ul>
                 </motion.div>
+
+
+                {/* Interactive Visualization */}
+                <LessonVisualization lessonSlug={slug} />
 
                 {/* Markdown Content */}
                 <motion.div
