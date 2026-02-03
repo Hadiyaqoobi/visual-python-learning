@@ -86,12 +86,99 @@ const HARDWARE_MODULES = [
   },
 ];
 
+const FIVE_LAYER_MODULES = [
+  {
+    id: 101,
+    name: "Digital Foundations",
+    description: "Binary, logic gates, boolean algebra, number systems",
+    icon: Binary,
+    color: "#3b82f6",
+    lessons: [
+      { id: "L01", route: "l01", title: "Binary Fundamentals", description: "Light switches → binary math → real-world coding" },
+      { id: "L02", route: "l02", title: "Logic Gates", description: "Decision makers → transistors → Python booleans" },
+      { id: "L03", route: "l03", title: "Boolean Algebra", description: "Laws of logic that optimize circuits" },
+      { id: "L04", route: "l04", title: "Number Systems", description: "Binary, hex, octal, and how computers count" },
+    ],
+  },
+  {
+    id: 102,
+    name: "Memory & Cache",
+    description: "Memory hierarchy, cache architecture",
+    icon: HardDrive,
+    color: "#22c55e",
+    lessons: [
+      { id: "L05", route: "l05", title: "Memory Organization", description: "Registers → SRAM → DRAM → disk hierarchy" },
+      { id: "L06", route: "l06", title: "Cache Systems", description: "Making memory blazing fast with locality" },
+    ],
+  },
+  {
+    id: 103,
+    name: "Data & Computation",
+    description: "Data types, ALU operations",
+    icon: CircuitBoard,
+    color: "#06b6d4",
+    lessons: [
+      { id: "L07", route: "l07", title: "Data Types & Representation", description: "Integers, floats, strings in binary" },
+      { id: "L08", route: "l08", title: "ALU Operations", description: "The brain's calculator: add, shift, compare" },
+    ],
+  },
+  {
+    id: 104,
+    name: "CPU Execution",
+    description: "Pipeline stages, branch prediction",
+    icon: Cpu,
+    color: "#f97316",
+    lessons: [
+      { id: "L09", route: "l09", title: "CPU Pipeline", description: "Fetch-decode-execute with instruction overlap" },
+      { id: "L10", route: "l10", title: "Branch Prediction", description: "How CPUs guess the future to stay fast" },
+    ],
+  },
+  {
+    id: 105,
+    name: "System Communication",
+    description: "Buses, I/O, and interrupts",
+    icon: Layers,
+    color: "#f59e0b",
+    lessons: [
+      { id: "L11", route: "l11", title: "Bus Architecture", description: "Data highways connecting components" },
+      { id: "L12", route: "l12", title: "I/O Systems", description: "Ports, DMA, and device communication" },
+      { id: "L13", route: "l13", title: "Interrupts", description: "How hardware gets the CPU's attention" },
+    ],
+  },
+  {
+    id: 106,
+    name: "Advanced Systems",
+    description: "Virtual memory, ISA, GPU, power management",
+    icon: Code2,
+    color: "#8b5cf6",
+    lessons: [
+      { id: "L14", route: "l14", title: "Virtual Memory", description: "The infinite memory illusion" },
+      { id: "L15", route: "l15", title: "Instruction Sets", description: "CISC vs RISC: the CPU's language" },
+      { id: "L16", route: "l16", title: "GPU Architecture", description: "Thousands of cores for parallel computing" },
+      { id: "L17", route: "l17", title: "Power Management", description: "P = CV²f and why batteries die" },
+    ],
+  },
+  {
+    id: 107,
+    name: "Parallelism & Integration",
+    description: "Multi-core processing, system integration",
+    icon: Layers,
+    color: "#ec4899",
+    lessons: [
+      { id: "L18", route: "l18", title: "Multi-Core Processing", description: "Amdahl's Law, threads, and synchronization" },
+      { id: "L19", route: "l19", title: "System Integration", description: "The complete picture: everything connected" },
+    ],
+  },
+];
+
 export default function HardwarePage() {
   const [expandedModule, setExpandedModule] = useState<number | null>(1);
+  const [expanded5Layer, setExpanded5Layer] = useState<number | null>(101);
   const [completedLessons] = useState<string[]>([]);
 
   const totalLessons = HARDWARE_MODULES.reduce((sum, m) => sum + m.lessons.length, 0);
   const total3DLessons = HARDWARE_MODULES.reduce((sum, m) => sum + m.lessons.filter(l => l.is3D).length, 0);
+  const total5LayerLessons = FIVE_LAYER_MODULES.reduce((sum, m) => sum + m.lessons.length, 0);
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0A0A1E 0%, #1A1A3E 50%, #0A0A1E 100%)" }}>
@@ -165,6 +252,20 @@ export default function HardwarePage() {
           </div>
           <div style={{
             padding: "12px 20px",
+            background: "linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1))",
+            border: "1px solid rgba(6, 182, 212, 0.2)",
+            borderRadius: 12,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}>
+            <Layers style={{ width: 18, height: 18, color: "#06b6d4" }} />
+            <span style={{ color: "white", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
+              {total5LayerLessons} Deep-Dive
+            </span>
+          </div>
+          <div style={{
+            padding: "12px 20px",
             background: "rgba(34, 197, 94, 0.1)",
             border: "1px solid rgba(34, 197, 94, 0.2)",
             borderRadius: 12,
@@ -201,7 +302,6 @@ export default function HardwarePage() {
                 background: "rgba(0, 0, 0, 0.3)",
               }}
             >
-              {/* Module Header */}
               <motion.button
                 onClick={() => setExpandedModule(isExpanded ? null : module.id)}
                 whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}
@@ -268,7 +368,6 @@ export default function HardwarePage() {
                 </div>
               </motion.button>
 
-              {/* Lessons */}
               <motion.div
                 initial={false}
                 animate={{
@@ -394,6 +493,202 @@ export default function HardwarePage() {
                   })}
                 </div>
               </motion.div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* 5-Layer Interactive Lessons Section */}
+      <div style={{ padding: "0 40px 24px" }}>
+        <div style={{ 
+          padding: "24px", 
+          borderRadius: 16, 
+          background: "linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1))",
+          border: "1px solid rgba(6, 182, 212, 0.3)",
+          marginBottom: 24,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+            <div style={{
+              padding: "4px 12px",
+              borderRadius: 8,
+              background: "linear-gradient(135deg, #06b6d4, #8b5cf6)",
+              fontSize: 12,
+              fontWeight: 700,
+              color: "white",
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>
+              5-LAYER SYSTEM
+            </div>
+            <span style={{ fontSize: 12, color: "#06b6d4", fontFamily: "'JetBrains Mono', monospace" }}>
+              19 Deep-Dive Lessons
+            </span>
+          </div>
+          <h2 style={{ 
+            fontSize: 24, 
+            fontWeight: 700, 
+            color: "white", 
+            margin: "0 0 8px",
+            fontFamily: "'JetBrains Mono', monospace",
+          }}>
+            Interactive Learning Paths
+          </h2>
+          <p style={{ color: "#888", fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+            Each lesson has 5 layers: Visual Metaphor → Interactive Playground → Technical Deep-Dive → Python Connection → Real World Applications. Navigate with keyboard shortcuts (Space, 1-5, ←→).
+          </p>
+        </div>
+
+        {FIVE_LAYER_MODULES.map((module, moduleIndex) => {
+          const ModuleIcon = module.icon;
+          const isExpanded = expanded5Layer === module.id;
+
+          return (
+            <motion.div
+              key={module.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: moduleIndex * 0.05 }}
+              style={{
+                marginBottom: 12,
+                borderRadius: 12,
+                overflow: "hidden",
+                border: `1px solid ${module.color}33`,
+                background: isExpanded ? `${module.color}08` : "rgba(255, 255, 255, 0.02)",
+              }}
+            >
+              <button
+                onClick={() => setExpanded5Layer(isExpanded ? null : module.id)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "16px 20px",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "white",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10,
+                    background: `${module.color}22`,
+                    border: `1px solid ${module.color}44`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}>
+                    <ModuleIcon style={{ width: 20, height: 20, color: module.color }} />
+                  </div>
+                  <div style={{ textAlign: "left" }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0, fontFamily: "'JetBrains Mono', monospace" }}>
+                      {module.name}
+                    </h3>
+                    <p style={{ fontSize: 12, color: "#666", margin: "2px 0 0" }}>
+                      {module.description} · {module.lessons.length} lessons
+                    </p>
+                  </div>
+                </div>
+                {isExpanded ? (
+                  <ChevronUp style={{ width: 20, height: 20, color: "#666" }} />
+                ) : (
+                  <ChevronDown style={{ width: 20, height: 20, color: "#666" }} />
+                )}
+              </button>
+
+              {isExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  style={{ padding: "0 20px 16px" }}
+                >
+                  {module.lessons.map((lesson) => (
+                    <Link key={lesson.id} href={`/hardware/${lesson.route}`} style={{ textDecoration: "none" }}>
+                      <motion.div
+                        whileHover={{ x: 4, background: `${module.color}15` }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "14px 16px",
+                          borderRadius: 10,
+                          marginBottom: 6,
+                          border: `1px solid ${module.color}22`,
+                          background: "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                          <div style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 8,
+                            background: `${module.color}22`,
+                            border: `1px solid ${module.color}33`,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: module.color,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            fontFamily: "'JetBrains Mono', monospace",
+                          }}>
+                            {lesson.id}
+                          </div>
+                          <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <h4 style={{ 
+                                fontSize: 14, 
+                                fontWeight: 600, 
+                                color: "white", 
+                                margin: 0,
+                                fontFamily: "'JetBrains Mono', monospace",
+                              }}>
+                                {lesson.title}
+                              </h4>
+                              <div style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 3,
+                                padding: "1px 6px",
+                                borderRadius: 6,
+                                background: "linear-gradient(135deg, #06b6d422, #8b5cf622)",
+                                border: "1px solid #06b6d433",
+                                fontSize: 9,
+                                fontWeight: 600,
+                                color: "#06b6d4",
+                              }}>
+                                5 LAYERS
+                              </div>
+                            </div>
+                            <p style={{ fontSize: 11, color: "#666", margin: "3px 0 0" }}>
+                              {lesson.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: "50%",
+                            background: module.color,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            boxShadow: `0 0 12px ${module.color}44`,
+                          }}
+                        >
+                          <Play style={{ width: 14, height: 14, color: "white", marginLeft: 2 }} />
+                        </motion.div>
+                      </motion.div>
+                    </Link>
+                  ))}
+                </motion.div>
+              )}
             </motion.div>
           );
         })}

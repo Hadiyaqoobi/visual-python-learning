@@ -16,12 +16,14 @@ import {
   Zap,
   Settings,
   Cpu,
+  Rocket,
 } from "lucide-react";
 import { useState } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Learn", href: "/learn", icon: BookOpen },
+  { name: "Projects", href: "/projects", icon: Rocket, isNew: true },
   { name: "Hardware", href: "/hardware", icon: Cpu },
   { name: "Python IDE", href: "/ide", icon: Code },
   { name: "Progress", href: "/progress", icon: BarChart3 },
@@ -182,7 +184,8 @@ export function Sidebar() {
             const isActive =
               pathname === item.href || pathname?.startsWith(item.href + "/");
             const Icon = item.icon;
-            const isHardware = item.name === "Hardware";
+            const isSpecial = item.name === "Hardware" || item.name === "Projects";
+            const isProjects = item.name === "Projects";
 
             return (
               <Link key={item.name} href={item.href} style={{ textDecoration: "none" }}>
@@ -195,7 +198,9 @@ export function Sidebar() {
                     padding: isCollapsed ? 14 : "14px 18px",
                     borderRadius: 12,
                     background: isActive
-                      ? isHardware
+                      ? isProjects
+                        ? "linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(22, 163, 74, 0.3) 100%)"
+                        : item.name === "Hardware"
                         ? "linear-gradient(135deg, rgba(249, 115, 22, 0.3) 0%, rgba(234, 88, 12, 0.3) 100%)"
                         : "linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%)"
                       : "transparent",
@@ -216,13 +221,15 @@ export function Sidebar() {
                       {item.name}
                     </motion.span>
                   )}
-                  {!isCollapsed && isHardware && (
+                  {!isCollapsed && (item as any).isNew && (
                     <span style={{
                       marginLeft: "auto",
                       fontSize: 10,
                       padding: "2px 6px",
                       borderRadius: 6,
-                      background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+                      background: isProjects 
+                        ? "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
+                        : "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
                       color: "white",
                       fontWeight: 600,
                     }}>

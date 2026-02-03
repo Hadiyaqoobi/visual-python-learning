@@ -148,6 +148,86 @@ const ALUChamber3D = dynamic(
 );
 
 // ============================================
+// 5-LAYER INTERACTIVE LESSONS (Revolutionary)
+// ============================================
+const L01_BinaryFundamentals = dynamic(
+  () => import("@/components/hardware/lessons/L01_BinaryFundamentals"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Binary Fundamentals..." /> }
+);
+const L02_LogicGates = dynamic(
+  () => import("@/components/hardware/lessons/L02_LogicGates"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Logic Gates..." /> }
+);
+const L03_Adders = dynamic(
+  () => import("@/components/hardware/lessons/L03_Adders"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Adders..." /> }
+);
+const L04_Multiplexers = dynamic(
+  () => import("@/components/hardware/lessons/L04_Multiplexers"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Multiplexers..." /> }
+);
+const L05_FlipFlops = dynamic(
+  () => import("@/components/hardware/lessons/L05_FlipFlops"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Flip-Flops..." /> }
+);
+const L06_ALU = dynamic(
+  () => import("@/components/hardware/lessons/L06_ALU"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading ALU..." /> }
+);
+const L07_FDECycle = dynamic(
+  () => import("@/components/hardware/lessons/L07_FDECycle"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading FDE Cycle..." /> }
+);
+const L08_MemoryHierarchy = dynamic(
+  () => import("@/components/hardware/lessons/L08_MemoryHierarchy"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Memory Hierarchy..." /> }
+);
+const L09_CacheSystem = dynamic(
+  () => import("@/components/hardware/lessons/L09_CacheSystem"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Cache Systems..." /> }
+);
+const L10_Pipelining = dynamic(
+  () => import("@/components/hardware/lessons/L10_Pipelining"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Pipelining..." /> }
+);
+const L11_BusArchitecture = dynamic(
+  () => import("@/components/hardware/lessons/L11_BusArchitecture"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Bus Architecture..." /> }
+);
+const L12_IOSystems = dynamic(
+  () => import("@/components/hardware/lessons/L12_IOSystems"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Instruction Sets..." /> }
+);
+const L13_Interrupts = dynamic(
+  () => import("@/components/hardware/lessons/L13_Interrupts"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Interrupts..." /> }
+);
+const L14_VirtualMemory = dynamic(
+  () => import("@/components/hardware/lessons/L14_VirtualMemory"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Virtual Memory..." /> }
+);
+const L15_InstructionSets = dynamic(
+  () => import("@/components/hardware/lessons/L15_InstructionSets"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Instruction Sets..." /> }
+);
+const L16_GPUArchitecture = dynamic(
+  () => import("@/components/hardware/lessons/L16_GPUArchitecture"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading GPU Architecture..." /> }
+);
+const L17_PowerManagement = dynamic(
+  () => import("@/components/hardware/lessons/L17_PowerManagement"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Power Management..." /> }
+);
+const L18_MultiCoreProcessing = dynamic(
+  () => import("@/components/hardware/lessons/L18_MultiCoreProcessing"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading Multi-Core Processing..." /> }
+);
+const L19_SystemIntegration = dynamic(
+  () => import("@/components/hardware/lessons/L19_SystemIntegration"),
+  { ssr: false, loading: () => <LoadingPlaceholder text="Loading System Integration..." /> }
+);
+
+// ============================================
 // 2D COMPONENTS (Standard)
 // ============================================
 const AnimatedAdder = dynamic(() => import("@/components/hardware/digital/AnimatedAdder"), { ssr: false });
@@ -403,6 +483,217 @@ const LESSONS: Record<string, {
     component: HardwareMaster3D,
     is3D: true,
     prev: "h19",
+  },
+
+  // ============================================
+  // 5-LAYER INTERACTIVE LESSONS
+  // ============================================
+  l01: {
+    id: "L01",
+    title: "Binary Fundamentals",
+    module: "Digital Foundations",
+    moduleColor: "#3b82f6",
+    description: "5-layer deep dive: Light switches to binary math",
+    component: L01_BinaryFundamentals,
+    is3D: false,
+    next: "l02",
+  },
+  l02: {
+    id: "L02",
+    title: "Logic Gates",
+    module: "Digital Foundations",
+    moduleColor: "#3b82f6",
+    description: "5-layer deep dive: AND, OR, NOT and beyond",
+    component: L02_LogicGates,
+    is3D: false,
+    prev: "l01",
+    next: "l03",
+  },
+  l03: {
+    id: "L03",
+    title: "Half & Full Adders",
+    module: "Building Blocks",
+    moduleColor: "#06b6d4",
+    description: "5-layer deep dive: How computers add numbers",
+    component: L03_Adders,
+    is3D: false,
+    prev: "l02",
+    next: "l04",
+  },
+  l04: {
+    id: "L04",
+    title: "Multiplexers & Decoders",
+    module: "Building Blocks",
+    moduleColor: "#06b6d4",
+    description: "5-layer deep dive: Data routing and selection",
+    component: L04_Multiplexers,
+    is3D: false,
+    prev: "l03",
+    next: "l05",
+  },
+  l05: {
+    id: "L05",
+    title: "Flip-Flops & Registers",
+    module: "Building Blocks",
+    moduleColor: "#8b5cf6",
+    description: "5-layer deep dive: Memory at the gate level",
+    component: L05_FlipFlops,
+    is3D: false,
+    prev: "l04",
+    next: "l06",
+  },
+  l06: {
+    id: "L06",
+    title: "Complete ALU Design",
+    module: "CPU Architecture",
+    moduleColor: "#f97316",
+    description: "5-layer deep dive: The brain's calculator",
+    component: L06_ALU,
+    is3D: false,
+    prev: "l05",
+    next: "l07",
+  },
+  l07: {
+    id: "L07",
+    title: "Fetch-Decode-Execute",
+    module: "CPU Architecture",
+    moduleColor: "#f97316",
+    description: "5-layer deep dive: The CPU's heartbeat",
+    component: L07_FDECycle,
+    is3D: false,
+    prev: "l06",
+    next: "l08",
+  },
+  l08: {
+    id: "L08",
+    title: "Memory Hierarchy",
+    module: "Memory Systems",
+    moduleColor: "#22c55e",
+    description: "5-layer deep dive: Speed vs size tradeoffs",
+    component: L08_MemoryHierarchy,
+    is3D: false,
+    prev: "l07",
+    next: "l09",
+  },
+  l09: {
+    id: "L09",
+    title: "Cache Systems",
+    module: "Memory Systems",
+    moduleColor: "#22c55e",
+    description: "5-layer deep dive: Making memory fast",
+    component: L09_CacheSystem,
+    is3D: false,
+    prev: "l08",
+    next: "l10",
+  },
+  l10: {
+    id: "L10",
+    title: "CPU Pipelining",
+    module: "Advanced Architecture",
+    moduleColor: "#ec4899",
+    description: "5-layer deep dive: Instruction-level parallelism",
+    component: L10_Pipelining,
+    is3D: false,
+    prev: "l09",
+    next: "l11",
+  },
+  l11: {
+    id: "L11",
+    title: "Bus Architecture",
+    module: "System Communication",
+    moduleColor: "#f59e0b",
+    description: "5-layer deep dive: Data highways connecting components",
+    component: L11_BusArchitecture,
+    is3D: false,
+    prev: "l10",
+    next: "l12",
+  },
+  l12: {
+    id: "L12",
+    title: "Instruction Sets",
+    module: "System Communication",
+    moduleColor: "#f59e0b",
+    description: "5-layer deep dive: Ports, DMA, and device communication",
+    component: L12_IOSystems,
+    is3D: false,
+    prev: "l11",
+    next: "l13",
+  },
+  l13: {
+    id: "L13",
+    title: "Interrupts",
+    module: "System Communication",
+    moduleColor: "#f59e0b",
+    description: "5-layer deep dive: How hardware gets the CPU's attention",
+    component: L13_Interrupts,
+    is3D: false,
+    prev: "l12",
+    next: "l14",
+  },
+  l14: {
+    id: "L14",
+    title: "Virtual Memory",
+    module: "Memory Systems",
+    moduleColor: "#22c55e",
+    description: "5-layer deep dive: Infinite memory illusion",
+    component: L14_VirtualMemory,
+    is3D: false,
+    prev: "l13",
+    next: "l15",
+  },
+  l15: {
+    id: "L15",
+    title: "Instruction Sets",
+    module: "Advanced Systems",
+    moduleColor: "#8b5cf6",
+    description: "5-layer deep dive: CISC vs RISC, the CPU's language",
+    component: L15_InstructionSets,
+    is3D: false,
+    prev: "l14",
+    next: "l16",
+  },
+  l16: {
+    id: "L16",
+    title: "GPU Architecture",
+    module: "Advanced Systems",
+    moduleColor: "#8b5cf6",
+    description: "5-layer deep dive: Thousands of cores for parallel computing",
+    component: L16_GPUArchitecture,
+    is3D: false,
+    prev: "l15",
+    next: "l17",
+  },
+  l17: {
+    id: "L17",
+    title: "Power Management",
+    module: "Advanced Systems",
+    moduleColor: "#8b5cf6",
+    description: "5-layer deep dive: P=CV²f and why batteries die",
+    component: L17_PowerManagement,
+    is3D: false,
+    prev: "l16",
+    next: "l18",
+  },
+  l18: {
+    id: "L18",
+    title: "Multi-Core Processing",
+    module: "Parallelism & Integration",
+    moduleColor: "#ec4899",
+    description: "5-layer deep dive: Amdahl's Law, threads, synchronization",
+    component: L18_MultiCoreProcessing,
+    is3D: false,
+    prev: "l17",
+    next: "l19",
+  },
+  l19: {
+    id: "L19",
+    title: "System Integration",
+    module: "Parallelism & Integration",
+    moduleColor: "#ec4899",
+    description: "5-layer deep dive: The complete picture, everything connected",
+    component: L19_SystemIntegration,
+    is3D: false,
+    prev: "l18",
   },
 };
 

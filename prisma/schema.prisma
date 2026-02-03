@@ -23,6 +23,8 @@ model User {
   lessonProgress LessonProgress[]
   exerciseAttempts ExerciseAttempt[]
   achievements   UserAchievement[]
+  projectProgress UserProjectProgress[]
+  milestoneSubmissions MilestoneSubmission[]
   
   // Gamification
   totalXp        Int       @default(0)
@@ -68,7 +70,7 @@ model Chapter {
 model Section {
   id          String    @id @default(cuid())
   chapterId   String
-  number      Float     // 1.1, 1.2, 1.3 etc
+  number      Float
   title       String
   description String?
   order       Int
@@ -87,15 +89,15 @@ model Section {
 model Lesson {
   id              String    @id @default(cuid())
   sectionId       String
-  number          Float     // 1.1.1, 1.1.2 etc
+  number          Float
   title           String
   slug            String    @unique
   objectives      String[]
-  content         String    // Markdown content
-  codeExamples    Json      // Array of code examples
+  content         String
+  codeExamples    Json
   keyPoints       String[]
-  hardwareDemo    String?   // Instructions for hardware visualization
-  estimatedTime   Int       @default(15) // Minutes
+  hardwareDemo    String?
+  estimatedTime   Int       @default(15)
   difficulty      Difficulty @default(BEGINNER)
   order           Int
   isPublished     Boolean   @default(false)
@@ -118,12 +120,12 @@ model Exercise {
   lessonId      String
   number        Int
   title         String
-  prompt        String       // The exercise description/question
+  prompt        String
   type          ExerciseType @default(CODE)
   starterCode   String?
   solution      String?
   hints         String[]
-  testCases     Json?        // Array of test cases for code exercises
+  testCases     Json?
   xpReward      Int          @default(10)
   difficulty    Difficulty   @default(BEGINNER)
   order         Int
@@ -148,7 +150,7 @@ model LessonProgress {
   status      ProgressStatus @default(NOT_STARTED)
   startedAt   DateTime?
   completedAt DateTime?
-  timeSpent   Int       @default(0) // Seconds
+  timeSpent   Int       @default(0)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
@@ -167,7 +169,7 @@ model ExerciseAttempt {
   userId      String
   exerciseId  String
   code        String?
-  response    String?   // For text responses
+  response    String?
   isCorrect   Boolean   @default(false)
   xpEarned    Int       @default(0)
   feedback    String?
@@ -187,7 +189,7 @@ model ExerciseAttempt {
 
 model Achievement {
   id          String    @id @default(cuid())
-  code        String    @unique // e.g., "first_lesson", "chapter_1_complete"
+  code        String    @unique
   title       String
   description String
   iconUrl     String?
@@ -215,6 +217,98 @@ model UserAchievement {
   @@index([userId])
 }
 
+// ==================== GUIDED PROJECTS ====================
+
+model GuidedProject {
+  id             String    @id @default(cuid())
+  slug           String    @unique
+  title          String
+  description    String
+  longDescription String?
+  imageUrl       String?
+  difficulty     Difficulty @default(BEGINNER)
+  estimatedHours Int       @default(20)
+  technologies   String[]
+  prerequisites  String[]
+  learningOutcomes String[]
+  isPublished    Boolean   @default(false)
+  order          Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  // Relations
+  milestones     ProjectMilestone[]
+  userProgress   UserProjectProgress[]
+  submissions    MilestoneSubmission[]
+
+  @@index([slug])
+  @@index([order])
+}
+
+model ProjectMilestone {
+  id             String    @id @default(cuid())
+  projectId      String
+  chapterNumber  Int
+  title          String
+  description    String
+  objectives     String[]
+  instructions   String
+  starterCode    String?
+  solutionCode   String?
+  hints          String[]
+  testInstructions String?
+  order          Int
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  // Relations
+  project        GuidedProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  submissions    MilestoneSubmission[]
+
+  @@unique([projectId, chapterNumber])
+  @@index([projectId])
+  @@index([order])
+}
+
+model UserProjectProgress {
+  id               String    @id @default(cuid())
+  userId           String
+  projectId        String
+  currentMilestone Int       @default(1)
+  currentCode      String?
+  status           ProgressStatus @default(NOT_STARTED)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  // Relations
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project          GuidedProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+model MilestoneSubmission {
+  id              String   @id @default(cuid())
+  userId          String
+  projectId       String
+  milestoneId     String
+  chapterNumber   Int
+  code            String?
+  output          String?
+  submittedAt     DateTime @default(now())
+  
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project         GuidedProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestone       ProjectMilestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+
+  @@index([userId, projectId])
+}
+
 // ==================== ENUMS ====================
 
 enum Difficulty {
@@ -224,12 +318,12 @@ enum Difficulty {
 }
 
 enum ExerciseType {
-  CODE           // Write code that passes tests
-  MULTIPLE_CHOICE // Select correct answer
-  TEXT_RESPONSE  // Free text response
-  FILL_BLANK     // Fill in missing code
-  FIX_BUG        // Find and fix the bug
-  PREDICT_OUTPUT // Predict what code will output
+  CODE
+  MULTIPLE_CHOICE
+  TEXT_RESPONSE
+  FILL_BLANK
+  FIX_BUG
+  PREDICT_OUTPUT
 }
 
 enum ProgressStatus {
@@ -239,9 +333,9 @@ enum ProgressStatus {
 }
 
 enum AchievementCategory {
-  PROGRESS      // Completing lessons/chapters
-  STREAK        // Daily streaks
-  MASTERY       // Perfect scores
-  EXPLORATION   // Trying features
-  SOCIAL        // Community
+  PROGRESS
+  STREAK
+  MASTERY
+  EXPLORATION
+  SOCIAL
 }
