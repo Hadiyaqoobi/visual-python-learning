@@ -74,6 +74,9 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
   const [exampleOutput, setExampleOutput] = useState<string>("");
   const { isReady: isPythonReady, runCode } = usePython();
   const [isRunning, setIsRunning] = useState(false);
+  const [isCompletingLesson, setIsCompletingLesson] = useState(false);
+  const [isLessonCompleted, setIsLessonCompleted] = useState(false);
+  const [completeLessonError, setCompleteLessonError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchLesson() {
@@ -98,6 +101,43 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
     fetchLesson();
   }, [slug, router]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    // Reset per-lesson UI state when navigating between lessons.
+    setIsLessonCompleted(false);
+    setCompleteLessonError(null);
+    setIsCompletingLesson(false);
+
+    async function fetchProgress() {
+      try {
+        const res = await fetch(`/api/progress/lessons/${slug}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (!cancelled && data?.progress?.status === "COMPLETED") {
+          setIsLessonCompleted(true);
+        }
+      } catch {
+        // Ignore (progress is a best-effort UI enhancement).
+      }
+    }
+
+    fetchProgress();
+
+    // Mark as started (idempotent). Keepalive so navigation doesn't cancel it.
+    fetch(`/api/progress/lessons/${slug}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "start" }),
+      keepalive: true,
+    }).catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
   const handleRunExample = async () => {
     if (!isPythonReady || !selectedExample) return;
     setIsRunning(true);
@@ -111,6 +151,35 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
       setExampleOutput(`Error: ${result.error}`);
     }
     setIsRunning(false);
+  };
+
+  const handleCompleteLesson = async () => {
+    if (!lesson || isCompletingLesson || isLessonCompleted) return;
+
+    setIsCompletingLesson(true);
+    setCompleteLessonError(null);
+
+    try {
+      const res = await fetch(`/api/progress/lessons/${lesson.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "complete" }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setCompleteLessonError(data?.error || "Failed to complete lesson");
+        return;
+      }
+
+      setIsLessonCompleted(true);
+    } catch (error) {
+      console.error("Complete lesson error:", error);
+      setCompleteLessonError("Network error. Please try again.");
+    } finally {
+      setIsCompletingLesson(false);
+    }
   };
 
   if (loading) {
@@ -533,11 +602,11 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
               </motion.div>
             )}
 
-            {/* Navigation */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+	            {/* Navigation */}
+	            <motion.div
+	              initial={{ opacity: 0, y: 20 }}
+	              animate={{ opacity: 1, y: 0 }}
+	              transition={{ delay: 0.3 }}
               style={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -545,9 +614,9 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                 paddingTop: "24px",
                 borderTop: "2px solid #e2e8f0",
               }}
-            >
-              {lesson.prevLesson ? (
-                <Link href={`/learn/${lesson.prevLesson.slug}`} style={{ textDecoration: "none" }}>
+	            >
+	              {lesson.prevLesson ? (
+	                <Link href={`/learn/${lesson.prevLesson.slug}`} style={{ textDecoration: "none" }}>
                   <motion.button
                     whileHover={{ scale: 1.02, x: -4 }}
                     whileTap={{ scale: 0.98 }}
@@ -573,59 +642,97 @@ export default function LessonPage({ params }: { params: Promise<{ slug: string 
                     </div>
                   </motion.button>
                 </Link>
-              ) : <div />}
-              {lesson.nextLesson ? (
-                <Link href={`/learn/${lesson.nextLesson.slug}`} style={{ textDecoration: "none" }}>
-                  <motion.button
-                    whileHover={{ scale: 1.02, x: 4 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "14px 20px",
-                      borderRadius: "12px",
-                      border: "none",
-                      background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                      color: "white",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                      boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)",
-                    }}
-                  >
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: "11px", opacity: 0.8 }}>Next Lesson</div>
-                      <div>{lesson.nextLesson.title}</div>
-                    </div>
-                    <ChevronRight style={{ width: "20px", height: "20px" }} />
-                  </motion.button>
-                </Link>
-              ) : (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "14px 24px",
-                    borderRadius: "12px",
-                    border: "none",
-                    background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
-                    color: "white",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    boxShadow: "0 4px 15px rgba(34, 197, 94, 0.3)",
-                  }}
-                >
-                  <Trophy style={{ width: "20px", height: "20px" }} />
-                  Complete Lesson
-                </motion.button>
-              )}
-            </motion.div>
-          </div>
+	              ) : <div />}
+	              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+	                <motion.button
+	                  whileHover={{ scale: 1.02 }}
+	                  whileTap={{ scale: 0.98 }}
+	                  onClick={handleCompleteLesson}
+	                  disabled={isCompletingLesson || isLessonCompleted}
+	                  style={{
+	                    display: "flex",
+	                    alignItems: "center",
+	                    gap: "10px",
+	                    padding: "14px 24px",
+	                    borderRadius: "12px",
+	                    border: "none",
+	                    background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+	                    color: "white",
+	                    fontSize: "14px",
+	                    fontWeight: "600",
+	                    cursor: isCompletingLesson || isLessonCompleted ? "not-allowed" : "pointer",
+	                    boxShadow: "0 4px 15px rgba(34, 197, 94, 0.3)",
+	                    opacity: isCompletingLesson || isLessonCompleted ? 0.75 : 1,
+	                  }}
+	                >
+	                  <Trophy style={{ width: "20px", height: "20px" }} />
+	                  {isCompletingLesson
+	                    ? "Completing..."
+	                    : isLessonCompleted
+	                      ? "Lesson Completed"
+	                      : "Complete Lesson"}
+	                </motion.button>
+
+	                {lesson.nextLesson ? (
+	                  <Link href={`/learn/${lesson.nextLesson.slug}`} style={{ textDecoration: "none" }}>
+	                    <motion.button
+	                      whileHover={{ scale: 1.02, x: 4 }}
+	                      whileTap={{ scale: 0.98 }}
+	                      style={{
+	                        display: "flex",
+	                        alignItems: "center",
+	                        gap: "10px",
+	                        padding: "14px 20px",
+	                        borderRadius: "12px",
+	                        border: "none",
+	                        background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+	                        color: "white",
+	                        fontSize: "14px",
+	                        fontWeight: "600",
+	                        cursor: "pointer",
+	                        boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)",
+	                      }}
+	                    >
+	                      <div style={{ textAlign: "right" }}>
+	                        <div style={{ fontSize: "11px", opacity: 0.8 }}>Next Lesson</div>
+	                        <div>{lesson.nextLesson.title}</div>
+	                      </div>
+	                      <ChevronRight style={{ width: "20px", height: "20px" }} />
+	                    </motion.button>
+	                  </Link>
+	                ) : (
+	                  <Link href="/learn" style={{ textDecoration: "none" }}>
+	                    <motion.button
+	                      whileHover={{ scale: 1.02, x: 4 }}
+	                      whileTap={{ scale: 0.98 }}
+	                      style={{
+	                        display: "flex",
+	                        alignItems: "center",
+	                        gap: "10px",
+	                        padding: "14px 20px",
+	                        borderRadius: "12px",
+	                        border: "1px solid #e2e8f0",
+	                        background: "white",
+	                        color: "#1e293b",
+	                        fontSize: "14px",
+	                        fontWeight: "500",
+	                        cursor: "pointer",
+	                        boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+	                      }}
+	                    >
+	                      Back to Learn
+	                      <ChevronRight style={{ width: "18px", height: "18px", color: "#64748b" }} />
+	                    </motion.button>
+	                  </Link>
+	                )}
+	              </div>
+	            </motion.div>
+	            {completeLessonError && (
+	              <div style={{ marginTop: "12px", color: "#ef4444", fontSize: "13px", fontWeight: 500 }}>
+	                {completeLessonError}
+	              </div>
+	            )}
+	          </div>
 
           {/* Right Column - Code Examples */}
           <div style={{ position: "sticky", top: "100px", alignSelf: "start" }}>
